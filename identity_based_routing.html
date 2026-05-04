@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cynapsa: Identity-Based Routing & Zero-Trust</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Animations */
+        @keyframes flow-fast { to { stroke-dashoffset: -20; } }
+        @keyframes flow-slow { to { stroke-dashoffset: -20; } }
+        @keyframes pulse-error {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+        }
+        @keyframes shield-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.4); border-color: #22d3ee; }
+            50% { box-shadow: 0 0 25px rgba(34, 211, 238, 0.8); border-color: #fff; }
+        }
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Line Styles */
+        .stream-legacy { stroke-dasharray: 8 8; animation: flow-slow 1s linear infinite; stroke: #f59e0b; stroke-width: 3; }
+        .stream-legacy-fail { stroke-dasharray: 8 8; stroke: #ef4444; stroke-width: 3; filter: drop-shadow(0 0 4px #ef4444); }
+        .stream-cynapsa { stroke-dasharray: 6 6; animation: flow-fast 0.4s linear infinite; stroke: #22d3ee; stroke-width: 3; filter: drop-shadow(0 0 5px #22d3ee); }
+        .stream-auth { stroke-dasharray: 4 4; animation: flow-fast 0.6s linear infinite; stroke: #a855f7; stroke-width: 2; }
+        
+        .fade-in { animation: fadeIn 0.5s ease-in forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Checklist styles */
+        .check-item { opacity: 0.3; transition: all 0.3s ease; }
+        .check-item.active { opacity: 1; color: #4ade80; }
+        .check-item.active::before { content: '✓ '; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 font-sans h-screen w-screen overflow-hidden flex">
+
+    <!-- Sidebar Narrative Panel -->
+    <div class="w-1/3 bg-slate-800 border-r border-slate-700 p-8 flex flex-col justify-between z-20 shadow-2xl overflow-y-auto">
+        <div>
+            <div class="mb-6">
+                <div class="text-cyan-400 font-bold tracking-widest text-xs mb-2">CYNAPSA SECRET SAUCE</div>
+                <h1 class="text-3xl font-bold text-white mb-2 leading-tight">Identity-Based <br><span class="text-slate-400">Routing</span></h1>
+                <p class="text-sm text-slate-400 mt-2">Legacy networks route by IP address, making mobility and security a nightmare. Cynapsa routes by cryptographic identity, ensuring true Zero-Trust and unbreakable connectivity.</p>
+            </div>
+
+            <!-- Stage Navigation -->
+            <div class="space-y-4 relative">
+                <!-- Line connecting steps -->
+                <div class="absolute left-4 top-4 bottom-4 w-0.5 bg-slate-700 -z-10"></div>
+
+                <!-- Legacy Mode -->
+                <button onclick="setMode('legacy')" id="btn-legacy" class="w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.15)] relative">
+                    <div id="dot-legacy" class="w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]">1</div>
+                    <div>
+                        <h3 class="text-white font-semibold text-lg">Before Cynapsa (IP Routing)</h3>
+                        <p class="text-sm text-slate-400 mt-1">Agents rely on DNS and IPs. Roaming breaks connections. Auth is left to the application.</p>
+                    </div>
+                </button>
+
+                <!-- Cynapsa Mode -->
+                <button onclick="setMode('cynapsa')" id="btn-cynapsa" class="w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative">
+                    <div id="dot-cynapsa" class="w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
+                    <div>
+                        <h3 class="text-white font-semibold text-lg">Cynapsa (Identity Routing)</h3>
+                        <p class="text-sm text-slate-400 mt-1">Out-of-band auth via CCP. Connections survive IP changes seamlessly.</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Action Panel -->
+        <div id="action-panel" class="mt-8 p-5 bg-slate-900 rounded-xl border border-slate-700 min-h-[260px] flex flex-col justify-between">
+            <div id="action-content" class="text-sm"></div>
+        </div>
+    </div>
+
+    <!-- Main Interactive Canvas -->
+    <div class="w-2/3 bg-[#0a0f1c] relative overflow-hidden" id="canvas-container">
+        <!-- SVG Layer for Network Lines -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" id="network-lines"></svg>
+
+        <div class="absolute inset-0 p-8">
+            <!-- DYNAMIC CANVAS RENDERED VIA JS -->
+            <div id="canvas-stage" class="w-full h-full relative fade-in"></div>
+        </div>
+    </div>
+
+    <script>
+        const canvasStage = document.getElementById('canvas-stage');
+        const networkLines = document.getElementById('network-lines');
+        const actionContent = document.getElementById('action-content');
+        let currentMode = 'legacy';
+        let isSimulating = false;
+        let lineIntervals = [];
+
+        // HTML Templates for the two modes
+        const templates = {
+            legacy: `
+                <!-- Mobile / Roaming Agent A -->
+                <div id="node-agent-a" class="absolute top-1/2 left-10 -translate-y-1/2 flex flex-col items-center z-20 transition-all duration-700">
+                    <div class="w-16 h-16 bg-slate-800 border-2 border-slate-400 rounded-xl flex items-center justify-center text-3xl shadow-lg">📱</div>
+                    <span class="text-xs font-bold text-slate-300 mt-2">Agent A (Mobile)</span>
+                    <span id="ip-label-a" class="text-[10px] bg-slate-700 px-2 py-0.5 rounded mt-1 text-orange-300 font-mono transition-colors">IP: 192.168.1.5 (WiFi)</span>
+                </div>
+
+                <!-- Central Infra -->
+                <div class="absolute top-16 left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
+                    <div id="node-dns" class="w-14 h-14 bg-slate-800 border border-slate-500 rounded-full flex items-center justify-center text-xl shadow-lg mb-2">📖</div>
+                    <span class="text-[10px] font-bold text-slate-400">DNS Server</span>
+                </div>
+
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-20 gap-4">
+                    <div id="node-fw" class="w-8 h-32 bg-red-900/40 border-2 border-red-500 rounded flex items-center justify-center writing-vertical text-xs font-bold text-red-400 tracking-widest shadow-[0_0_10px_rgba(239,68,68,0.2)]">FIREWALL (PORT 443 OPEN)</div>
+                    <div id="node-api" class="w-24 h-12 bg-slate-800 border border-slate-500 rounded flex items-center justify-center text-xs font-bold text-slate-300">API Gateway</div>
+                </div>
+
+                <!-- Target Agent B -->
+                <div id="node-agent-b" class="absolute top-1/2 right-10 -translate-y-1/2 flex flex-col items-center z-20">
+                    <div class="w-16 h-16 bg-slate-800 border-2 border-slate-400 rounded-xl flex items-center justify-center text-3xl shadow-lg relative">
+                        🤖
+                        <div id="auth-burden" class="absolute -top-8 w-32 text-center text-[9px] bg-orange-900/80 text-orange-200 p-1 rounded border border-orange-500 hidden">Checking Auth... (App Layer Risk)</div>
+                    </div>
+                    <span class="text-xs font-bold text-slate-300 mt-2">Agent B (Server)</span>
+                    <span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded mt-1 text-slate-400 font-mono">IP: 203.0.113.4</span>
+                </div>
+            `,
+            cynapsa: `
+                <!-- Mobile / Roaming Agent A -->
+                <div id="node-cyn-a" class="absolute top-1/2 left-10 -translate-y-1/2 flex flex-col items-center z-20 transition-all duration-700">
+                    <div id="icon-cyn-a" class="w-16 h-16 bg-slate-800 border-2 border-cyan-500 rounded-xl flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(34,211,238,0.3)]">📱</div>
+                    <span class="text-xs font-bold text-slate-300 mt-2">Agent A (Mobile)</span>
+                    <span class="text-[10px] bg-cyan-900/50 px-2 py-0.5 rounded mt-1 text-cyan-300 font-mono border border-cyan-700">ID: 0x8F2A...</span>
+                    <span id="ip-label-cyn-a" class="text-[9px] text-slate-500 mt-1 font-mono transition-colors">IP: 192.168.1.5 (WiFi)</span>
+                </div>
+
+                <!-- Cynapsa Control Plane (CCP) -->
+                <div id="node-ccp" class="absolute top-10 left-1/2 -translate-x-1/2 flex flex-col items-center z-30">
+                    <div class="w-20 h-20 bg-slate-800 border-2 border-purple-500 rounded-full flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(168,85,247,0.3)] relative">
+                        🧠
+                        <!-- CCP Checklist UI -->
+                        <div id="ccp-checklist" class="absolute top-full mt-4 w-56 bg-slate-800 border border-purple-500/50 rounded-lg p-3 text-[10px] font-mono shadow-2xl opacity-0 transition-opacity duration-300">
+                            <div class="text-purple-400 font-bold mb-2 uppercase border-b border-slate-700 pb-1">Out-of-Band Auth</div>
+                            <div id="chk-1" class="check-item mb-1">1. Valid IdP Identity</div>
+                            <div id="chk-2" class="check-item mb-1">2. Shared Mesh Network</div>
+                            <div id="chk-3" class="check-item mb-1">3. Topology Rules Allow</div>
+                            <div id="chk-4" class="check-item">4. User Context Valid</div>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-purple-300 mt-2">Cynapsa Control Plane</span>
+                </div>
+
+                <!-- NAT / Firewalls (Deny All) -->
+                <div class="absolute top-1/2 left-[30%] -translate-y-1/2 w-4 h-48 bg-slate-700 border-2 border-slate-500 rounded flex items-center justify-center writing-vertical text-[10px] text-slate-400 opacity-50">NAT</div>
+                <div class="absolute top-1/2 right-[30%] -translate-y-1/2 w-4 h-48 bg-slate-700 border-2 border-slate-500 rounded flex items-center justify-center writing-vertical text-[10px] text-slate-400 opacity-50">NAT</div>
+
+                <!-- Target Agent B -->
+                <div id="node-cyn-b" class="absolute top-1/2 right-10 -translate-y-1/2 flex flex-col items-center z-20">
+                    <div id="icon-cyn-b" class="w-16 h-16 bg-slate-800 border-2 border-cyan-500 rounded-xl flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(34,211,238,0.3)]">🤖</div>
+                    <span class="text-xs font-bold text-slate-300 mt-2">Agent B (Server)</span>
+                    <span class="text-[10px] bg-cyan-900/50 px-2 py-0.5 rounded mt-1 text-cyan-300 font-mono border border-cyan-700">ID: 0x4B9E...</span>
+                    <span class="text-[9px] text-slate-500 mt-1 font-mono">IP: 10.0.0.8 (Private)</span>
+                </div>
+            `
+        };
+
+        const uiPanels = {
+            legacy: `
+                <div class="space-y-3">
+                    <button onclick="runLegacyRoaming()" class="w-full py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded text-sm transition-colors font-medium shadow-lg">Simulate Mobile Roaming (IP Change)</button>
+                    <p class="text-xs text-slate-400 mt-4 leading-relaxed"><strong class="text-orange-400">The Problem:</strong> When Agent A switches from WiFi to 5G, its IP changes mid-session. The firewall and API gateway lose track of the connection, dropping packets and requiring complete re-authentication. Furthermore, authentication is a heavy burden left to Agent B's application code.</p>
+                </div>
+            `,
+            cynapsa: `
+                <div class="space-y-3">
+                    <button onclick="runCynapsaAuth()" id="btn-cyn-1" class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded text-sm transition-colors font-medium shadow-lg">1. Authorize via Control Plane</button>
+                    <button onclick="runCynapsaRoaming()" id="btn-cyn-2" class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-sm transition-colors font-medium shadow-lg opacity-50 cursor-not-allowed" disabled>2. Simulate Mobile Roaming</button>
+                    <p class="text-xs text-slate-400 mt-4 leading-relaxed"><strong class="text-cyan-400">The Solution:</strong> The CCP authenticates cryptographic identities out-of-band before any data flows. Because the P2P connection routes via Identity, Agent A can seamlessly switch networks (IP changes) without dropping a single packet.</p>
+                </div>
+            `
+        };
+
+        function setMode(mode) {
+            if (isSimulating) return;
+            currentMode = mode;
+            clearLines();
+            
+            // Toggle sidebar buttons
+            const btnLegacy = document.getElementById('btn-legacy');
+            const btnCynapsa = document.getElementById('btn-cynapsa');
+            const dotLegacy = document.getElementById('dot-legacy');
+            const dotCynapsa = document.getElementById('dot-cynapsa');
+
+            if (mode === 'legacy') {
+                btnLegacy.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.15)] relative";
+                dotLegacy.className = "w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]";
+                btnCynapsa.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative";
+                dotCynapsa.className = "w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10";
+            } else {
+                btnCynapsa.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.15)] relative";
+                dotCynapsa.className = "w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]";
+                btnLegacy.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative";
+                dotLegacy.className = "w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10";
+            }
+
+            canvasStage.innerHTML = templates[mode];
+            actionContent.innerHTML = uiPanels[mode];
+        }
+
+        // --- Legacy Simulation ---
+        function runLegacyRoaming() {
+            if (isSimulating) return;
+            isSimulating = true;
+            clearLines();
+            
+            const agentA = document.getElementById('node-agent-a');
+            const ipLabel = document.getElementById('ip-label-a');
+            const authBurden = document.getElementById('auth-burden');
+
+            // 1. Send Request (A -> FW -> API -> B)
+            drawLine('node-agent-a', 'node-fw', 'stream-legacy', 'line1');
+            drawLine('node-fw', 'node-api', 'stream-legacy', 'line2');
+            drawLine('node-api', 'node-agent-b', 'stream-legacy', 'line3');
+
+            setTimeout(() => {
+                authBurden.classList.remove('hidden');
+                
+                // 2. Mid-processing, Agent A roams
+                setTimeout(() => {
+                    agentA.style.transform = "translateY(-100px)"; // Move physically
+                    ipLabel.innerText = "IP: 10.5.2.99 (5G)";
+                    ipLabel.className = "text-[10px] bg-red-900/80 px-2 py-0.5 rounded mt-1 text-red-300 font-mono transition-colors";
+                    
+                    // 3. Response tries to go back to old IP
+                    setTimeout(() => {
+                        clearLines();
+                        authBurden.innerText = "Auth Passed. Replying...";
+                        drawLine('node-agent-b', 'node-api', 'stream-legacy', 'line4');
+                        drawLine('node-api', 'node-fw', 'stream-legacy', 'line5');
+                        
+                        // Fail line (points to old position)
+                        const oldY = agentA.getBoundingClientRect().top + 100; // rough old pos
+                        drawFailLine('node-fw', oldY);
+
+                        setTimeout(() => {
+                            resetState();
+                        }, 3000);
+                    }, 1000);
+                }, 1500);
+            }, 1000);
+        }
+
+        // --- Cynapsa Simulation ---
+        function runCynapsaAuth() {
+            if (isSimulating) return;
+            isSimulating = true;
+            clearLines();
+
+            const btn1 = document.getElementById('btn-cyn-1');
+            const btn2 = document.getElementById('btn-cyn-2');
+            const checklist = document.getElementById('ccp-checklist');
+            
+            btn1.innerText = "Authenticating Out-of-Band...";
+            
+            // 1. Agent A requests route from CCP
+            drawLine('node-cyn-a', 'node-ccp', 'stream-auth', 'auth1');
+            
+            setTimeout(() => {
+                checklist.style.opacity = '1';
+                
+                // Check off items
+                const checks = ['chk-1', 'chk-2', 'chk-3', 'chk-4'];
+                checks.forEach((id, index) => {
+                    setTimeout(() => {
+                        document.getElementById(id).classList.add('active');
+                    }, (index + 1) * 400);
+                });
+
+                // 2. CCP Grants Route, P2P Tunnel Opens
+                setTimeout(() => {
+                    clearLines();
+                    checklist.style.opacity = '0';
+                    btn1.innerText = "Auth Complete. P2P Tunnel Active.";
+                    btn1.classList.replace('bg-purple-600', 'bg-green-600');
+                    
+                    document.getElementById('icon-cyn-a').style.animation = "shield-glow 2s infinite";
+                    document.getElementById('icon-cyn-b').style.animation = "shield-glow 2s infinite";
+
+                    // Direct P2P Line
+                    drawLine('node-cyn-a', 'node-cyn-b', 'stream-cynapsa', 'p2p-line');
+
+                    isSimulating = false;
+                    btn2.disabled = false;
+                    btn2.classList.remove('opacity-50', 'cursor-not-allowed');
+
+                }, 2500);
+            }, 600);
+        }
+
+        function runCynapsaRoaming() {
+            if (isSimulating) return;
+            isSimulating = true;
+
+            const agentA = document.getElementById('node-cyn-a');
+            const ipLabel = document.getElementById('ip-label-cyn-a');
+            const btn2 = document.getElementById('btn-cyn-2');
+            
+            btn2.innerText = "Roaming... Tunnel Auto-Adjusting";
+
+            // Move agent and change IP
+            agentA.style.transform = "translateY(-100px)"; 
+            ipLabel.innerText = "IP: 10.5.2.99 (5G)";
+            
+            // Update line continuously as it moves
+            const updateLine = setInterval(() => {
+                const line = document.getElementById('p2p-line');
+                if(line) {
+                    const rect1 = agentA.getBoundingClientRect();
+                    const containerRect = document.getElementById('canvas-container').getBoundingClientRect();
+                    line.setAttribute('y1', rect1.top + rect1.height/2 - containerRect.top);
+                }
+            }, 20);
+
+            setTimeout(() => {
+                clearInterval(updateLine);
+                btn2.innerText = "Connection Maintained Successfully!";
+                btn2.classList.replace('bg-cyan-600', 'bg-green-600');
+                
+                setTimeout(() => {
+                    resetState();
+                }, 3000);
+            }, 1000);
+        }
+
+
+        // --- Helpers ---
+        function drawLine(id1, id2, cssClass, domId) {
+            const el1 = document.getElementById(id1);
+            const el2 = document.getElementById(id2);
+            if (!el1 || !el2) return;
+
+            const rect1 = el1.getBoundingClientRect();
+            const rect2 = el2.getBoundingClientRect();
+            const containerRect = document.getElementById('canvas-container').getBoundingClientRect();
+
+            const x1 = rect1.left + rect1.width/2 - containerRect.left;
+            const y1 = rect1.top + rect1.height/2 - containerRect.top;
+            const x2 = rect2.left + rect2.width/2 - containerRect.left;
+            const y2 = rect2.top + rect2.height/2 - containerRect.top;
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('class', cssClass);
+            if(domId) line.setAttribute('id', domId);
+
+            networkLines.appendChild(line);
+            return line;
+        }
+
+        function drawFailLine(id1, targetY) {
+            const el1 = document.getElementById(id1);
+            if (!el1) return;
+            const rect1 = el1.getBoundingClientRect();
+            const containerRect = document.getElementById('canvas-container').getBoundingClientRect();
+
+            const x1 = rect1.left + rect1.width/2 - containerRect.left;
+            const y1 = rect1.top + rect1.height/2 - containerRect.top;
+            
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', 40); // Hardcoded left edge roughly
+            line.setAttribute('y2', targetY - containerRect.top);
+            line.setAttribute('class', 'stream-legacy-fail');
+            
+            networkLines.appendChild(line);
+        }
+
+        function clearLines() {
+            networkLines.innerHTML = '';
+        }
+
+        function resetState() {
+            isSimulating = false;
+            setMode(currentMode);
+        }
+
+        // Init
+        window.onload = () => {
+            setTimeout(() => setMode('legacy'), 100);
+        };
+
+        window.addEventListener('resize', () => {
+            if(!isSimulating) setMode(currentMode);
+        });
+    </script>
+</body>
+</html>
