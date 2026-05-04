@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Evolution of Agentic Networking | Cynapsa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Animations */
+        @keyframes flow-fast {
+            to { stroke-dashoffset: -20; }
+        }
+        @keyframes flow-slow {
+            to { stroke-dashoffset: -20; }
+        }
+        @keyframes pulse-error {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+        }
+        @keyframes shield-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.4); border-color: #22d3ee; }
+            50% { box-shadow: 0 0 25px rgba(34, 211, 238, 0.8); border-color: #fff; }
+        }
+        
+        .data-stream {
+            stroke-dasharray: 10 10;
+            animation: flow-fast 0.5s linear infinite;
+        }
+        .data-stream-slow {
+            stroke-dasharray: 10 10;
+            animation: flow-slow 2s linear infinite;
+        }
+        .data-stream-mesh {
+            stroke-dasharray: 6 6;
+            animation: flow-fast 0.3s linear infinite;
+            stroke: #22d3ee;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 4px #22d3ee);
+        }
+        .data-stream-mesh-idle {
+            stroke-dasharray: 4 4;
+            stroke: #334155;
+            stroke-width: 2;
+        }
+
+        .env-box { transition: all 0.5s ease-in-out; }
+        
+        .firewall-solid { border: 4px solid #dc2626; box-shadow: inset 0 0 20px rgba(220, 38, 38, 0.2); }
+        .firewall-open { border: 4px dashed #f59e0b; box-shadow: inset 0 0 20px rgba(245, 158, 11, 0.2); }
+        .firewall-mesh { border: 4px solid #475569; }
+
+        .hidden-stage { display: none !important; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 font-sans h-screen w-screen overflow-hidden flex">
+
+    <!-- Sidebar Narrative Panel -->
+    <div class="w-1/3 bg-slate-800 border-r border-slate-700 p-8 flex flex-col justify-between z-20 shadow-2xl overflow-y-auto">
+        <div>
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-white mb-2 leading-tight">The Agentic <br><span class="text-cyan-400">Networking Crisis</span></h1>
+                <p class="text-sm text-slate-400">See why legacy IT infrastructure fails autonomous AI, and how Cynapsa fixes it.</p>
+            </div>
+
+            <!-- Stage Navigation -->
+            <div class="space-y-4 relative">
+                <!-- Line connecting steps -->
+                <div class="absolute left-4 top-4 bottom-4 w-0.5 bg-slate-700 -z-10"></div>
+
+                <!-- Step 1 -->
+                <button onclick="setStage(1)" id="btn-step1" class="w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.15)] relative">
+                    <div id="dot-step1" class="w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]">1</div>
+                    <div>
+                        <h3 class="text-white font-semibold text-lg">The "Lab" Environment</h3>
+                        <p class="text-sm text-slate-400 mt-1">Agentic frameworks assume a single, perfectly connected environment.</p>
+                    </div>
+                </button>
+
+                <!-- Step 2 -->
+                <button onclick="setStage(2)" id="btn-step2" class="w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative">
+                    <div id="dot-step2" class="w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
+                    <div>
+                        <h3 class="text-white font-semibold text-lg">Production Reality (Legacy)</h3>
+                        <p class="text-sm text-slate-400 mt-1">Scaling agentic fleets requires massive overhead: Load Balancers, API Gateways, and choked VPNs.</p>
+                    </div>
+                </button>
+
+                <!-- Step 3 -->
+                <button onclick="setStage(3)" id="btn-step3" class="w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative">
+                    <div id="dot-step3" class="w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">3</div>
+                    <div>
+                        <h3 class="text-white font-semibold text-lg">Cynapsa Mesh</h3>
+                        <p class="text-sm text-slate-400 mt-1">Identity-native, portless mesh with automated, decentralized agent load balancing.</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Dynamic Action Panel based on Stage -->
+        <div id="action-panel" class="mt-8 p-5 bg-slate-900 rounded-xl border border-slate-700 min-h-[180px]">
+            <!-- Content injected via JS -->
+        </div>
+    </div>
+
+    <!-- Main Interactive Canvas -->
+    <div class="w-2/3 bg-[#0a0f1c] relative overflow-hidden" id="canvas-container">
+        
+        <!-- SVG Layer for Network Lines -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" id="network-lines">
+            <!-- Lines injected via JS -->
+        </svg>
+
+        <!-- Dynamic Canvas Content -->
+        <div id="canvas-stage" class="absolute inset-0 p-12 flex items-center justify-center">
+            <!-- Stage content injected via JS -->
+        </div>
+
+    </div>
+
+    <script>
+        // DOM Elements
+        const canvasStage = document.getElementById('canvas-stage');
+        const networkLines = document.getElementById('network-lines');
+        const actionPanel = document.getElementById('action-panel');
+
+        // State
+        let currentStage = 1;
+        let connectionAttempted = false;
+
+        // Stage Configurations
+        const stages = {
+            1: {
+                title: "Single Environment (The Assumption)",
+                panelHtml: `
+                    <h4 class="text-cyan-400 font-bold mb-2">The Framework Assumption</h4>
+                    <p class="text-sm text-slate-300 mb-4">Frameworks like LangChain or AutoGen assume all agents live in the same box. Connectivity is easy, but it doesn't reflect enterprise scale.</p>
+                    <button onclick="runStage1Demo()" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded font-medium transition-colors">Observe Traffic</button>
+                `,
+                render: () => `
+                    <div class="relative w-full max-w-2xl h-96 border-2 border-slate-600 bg-slate-800/40 rounded-2xl p-6 flex items-center justify-center fade-in">
+                        <div class="absolute top-3 left-4 text-xs font-mono text-slate-500 tracking-widest">SINGLE CLOUD VPC</div>
+                        
+                        <div class="flex justify-between w-full px-16 relative z-20">
+                            <div id="node-a1" class="w-16 h-16 bg-slate-700 border-2 border-slate-400 rounded-full flex items-center justify-center text-2xl shadow-lg relative">🤖<div class="absolute -bottom-6 whitespace-nowrap text-xs font-bold text-slate-300">Sales Agent</div></div>
+                            <div id="node-b1" class="w-16 h-16 bg-slate-700 border-2 border-slate-400 rounded-full flex items-center justify-center text-2xl shadow-lg relative">📊<div class="absolute -bottom-6 whitespace-nowrap text-xs font-bold text-slate-300">Data Agent</div></div>
+                            <div id="node-c1" class="w-16 h-16 bg-slate-700 border-2 border-slate-400 rounded-full flex items-center justify-center text-2xl shadow-lg relative">🛠️<div class="absolute -bottom-6 whitespace-nowrap text-xs font-bold text-slate-300">Action Agent</div></div>
+                        </div>
+                    </div>
+                `
+            },
+            2: {
+                title: "Distributed Reality (Legacy IT)",
+                panelHtml: `
+                    <h4 class="text-orange-400 font-bold mb-2">The Production Nightmare</h4>
+                    <p class="text-sm text-slate-300 mb-4">Try connecting a fleet of Cloud Agents to an On-Premise Database. Scaling requires stacking complex legacy bottlenecks.</p>
+                    <div class="space-y-2">
+                        <button onclick="simulateLegacy('firewall')" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white rounded text-sm transition-colors border border-slate-500">1. Direct Connection (Blocked by Firewall)</button>
+                        <button onclick="simulateLegacy('stack')" id="btn-stack" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white rounded text-sm transition-colors border border-slate-500 opacity-50 cursor-not-allowed" disabled>2. Build Legacy Stack (LB + API GW + VPN)</button>
+                    </div>
+                `,
+                render: () => `
+                    <div class="w-full h-full relative fade-in">
+                        <!-- Cloud Fleet -->
+                        <div class="absolute top-6 left-10 w-72 h-80 border-2 border-blue-500/50 bg-blue-900/10 rounded-xl p-4 flex flex-col items-center z-20">
+                            <div class="absolute top-2 left-3 text-[10px] font-mono text-blue-400">AWS CLOUD (AGENT FLEET)</div>
+                            
+                            <!-- Many Agents -->
+                            <div class="flex justify-between w-full mt-6 px-2">
+                               <div id="node-ag1" class="w-10 h-10 bg-slate-700 border border-slate-400 rounded-full flex items-center justify-center text-sm z-20 shadow-md">🤖</div>
+                               <div id="node-ag2" class="w-10 h-10 bg-slate-700 border border-slate-400 rounded-full flex items-center justify-center text-sm z-20 shadow-md">🤖</div>
+                               <div id="node-ag3" class="w-10 h-10 bg-slate-700 border border-slate-400 rounded-full flex items-center justify-center text-sm z-20 shadow-md">🤖</div>
+                               <div id="node-ag4" class="w-10 h-10 bg-slate-700 border border-slate-400 rounded-full flex items-center justify-center text-sm z-20 shadow-md">🤖</div>
+                            </div>
+                            
+                            <!-- Legacy Stack components (dimmed initially) -->
+                            <div id="node-lb" class="w-56 h-10 mt-8 bg-slate-800 border border-slate-600 flex items-center justify-center text-xs font-bold text-slate-500 z-20 transition-all rounded shadow-inner">External Load Balancer</div>
+                            
+                            <div id="node-api" class="w-56 h-12 mt-4 bg-slate-800 border border-slate-600 flex flex-col items-center justify-center text-xs font-bold text-slate-500 z-20 transition-all rounded shadow-inner">
+                                <span>L7 API Gateway</span>
+                            </div>
+                            
+                            <!-- Focus point for direct routing attempt -->
+                            <div id="node-fleet-bottom" class="absolute bottom-0 w-full h-1"></div>
+                        </div>
+
+                        <!-- On Prem -->
+                        <div id="env-onprem" class="absolute bottom-6 right-10 w-72 h-80 firewall-solid bg-slate-800/80 rounded-xl p-4 flex flex-col items-center justify-start z-10 transition-all">
+                            <div class="absolute top-2 left-3 text-[10px] font-mono text-red-400" id="label-onprem">ON-PREM / AIR-GAPPED</div>
+                            
+                            <div id="node-onprem-api" class="w-56 h-10 mt-8 bg-slate-800 border border-slate-600 flex items-center justify-center text-xs font-bold text-slate-500 z-20 transition-all rounded shadow-inner">
+                                <span>L7 API Gateway</span>
+                            </div>
+                            
+                            <div id="node-onprem-lb" class="w-56 h-10 mt-4 bg-slate-800 border border-slate-600 flex items-center justify-center text-xs font-bold text-slate-500 z-20 transition-all rounded shadow-inner">
+                                Internal Load Balancer
+                            </div>
+
+                            <div id="node-onprem" class="w-16 h-16 mt-8 bg-slate-700 border-2 border-slate-400 rounded-full flex items-center justify-center text-2xl z-20">🗄️</div>
+                            <div class="mt-2 text-xs font-bold text-slate-300">Secure Database</div>
+                            <!-- Hacker warning hidden initially -->
+                            <div id="hacker-warning" class="absolute -top-8 right-0 text-red-500 animate-bounce hidden">⚠️ Vulnerable to Lateral Movement!</div>
+                        </div>
+
+                        <!-- VPN Hub (Hidden initially) -->
+                        <div id="env-vpn" class="absolute top-[60%] left-1/2 -translate-x-1/2 w-48 h-32 border-2 border-purple-500 bg-purple-900/20 rounded-xl p-4 flex flex-col items-center justify-center hidden opacity-0 transition-opacity duration-500 z-10">
+                            <div class="absolute top-2 left-3 text-[10px] font-mono text-purple-400">VPN GATEWAY</div>
+                            <div id="node-vpn" class="w-12 h-12 bg-slate-700 border-2 border-purple-400 rounded-lg flex items-center justify-center text-xl z-20">🚦</div>
+                            <div class="mt-2 text-xs font-bold text-slate-300">Chokepoint</div>
+                        </div>
+                    </div>
+                `
+            },
+            3: {
+                title: "Cynapsa Mesh",
+                panelHtml: `
+                    <h4 class="text-cyan-400 font-bold mb-2">The Cynapsa Solution</h4>
+                    <p class="text-sm text-slate-300 mb-4">A portless, identity-native overlay. The mesh inherently understands agent identity and load balances natively.</p>
+                    <div class="space-y-2">
+                        <button onclick="simulateCynapsa('connect')" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-sm transition-colors border border-cyan-400 font-medium">1. Establish Portless Mesh</button>
+                        <button onclick="simulateCynapsa('failover')" id="btn-failover" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white rounded text-sm transition-colors border border-slate-500 opacity-50 cursor-not-allowed" disabled>2. Simulate Instance Failure (Native LB)</button>
+                    </div>
+                `,
+                render: () => `
+                    <div class="w-full h-full relative fade-in">
+                        <!-- Cloud Orchestrator -->
+                        <div class="absolute top-1/2 left-10 -translate-y-1/2 w-48 h-40 firewall-mesh bg-slate-800/40 rounded-xl flex flex-col items-center justify-center">
+                            <div class="absolute top-2 left-2 text-[10px] font-mono text-slate-500">AWS CLOUD (ORCHESTRATOR)</div>
+                            <div id="node-cyn-cloud" class="w-14 h-14 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-xl z-20 shadow-[0_0_10px_#22d3ee]">☁️🤖</div>
+                        </div>
+
+                        <!-- Azure Instance 1 -->
+                        <div id="env-cyn-azure1" class="absolute top-10 right-1/2 translate-x-1/2 w-48 h-36 firewall-mesh bg-slate-800/40 rounded-xl flex flex-col items-center justify-center transition-all duration-300">
+                            <div class="absolute top-2 left-2 text-[10px] font-mono text-slate-500">AZURE (DATA AGENT - INSTANCE 1)</div>
+                            <div id="node-cyn-inst1" class="w-14 h-14 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-xl z-20 shadow-[0_0_10px_#22d3ee]">⚙️1</div>
+                            <div id="fail-x1" class="absolute inset-0 flex items-center justify-center text-6xl text-red-500 font-bold hidden bg-red-900/50 rounded-xl z-30 backdrop-blur-sm">X</div>
+                        </div>
+
+                        <!-- Azure Instance 2 -->
+                        <div id="env-cyn-azure2" class="absolute bottom-10 right-1/2 translate-x-1/2 w-48 h-36 firewall-mesh bg-slate-800/40 rounded-xl flex flex-col items-center justify-center transition-all duration-300">
+                            <div class="absolute top-2 left-2 text-[10px] font-mono text-slate-500">AZURE (DATA AGENT - INSTANCE 2)</div>
+                            <div id="node-cyn-inst2" class="w-14 h-14 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-xl z-20 shadow-[0_0_10px_#22d3ee]">⚙️2</div>
+                        </div>
+
+                        <!-- On Prem -->
+                        <div class="absolute top-1/2 right-10 -translate-y-1/2 w-48 h-40 firewall-mesh bg-slate-800/40 rounded-xl flex flex-col items-center justify-center">
+                            <div class="absolute top-2 left-2 text-[10px] font-mono text-slate-500">ON-PREM DB (DENY ALL)</div>
+                            <div id="node-cyn-onprem" class="w-14 h-14 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-xl z-20 shadow-[0_0_10px_#22d3ee]">🗄️</div>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        // UI Logic
+        function setStage(stageNum) {
+            currentStage = stageNum;
+            connectionAttempted = false;
+            
+            // Update Sidebar Styling
+            [1, 2, 3].forEach(num => {
+                const btn = document.getElementById(`btn-step${num}`);
+                const dot = document.getElementById(`dot-step${num}`);
+                if (num === stageNum) {
+                    btn.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.15)] relative";
+                    dot.className = "w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]";
+                } else {
+                    btn.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative";
+                    dot.className = "w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10";
+                }
+            });
+
+            // Inject Content
+            actionPanel.innerHTML = stages[stageNum].panelHtml;
+            canvasStage.innerHTML = stages[stageNum].render();
+            networkLines.innerHTML = ''; // Clear lines
+        }
+
+        // --- Stage 1 Logic ---
+        function runStage1Demo() {
+            networkLines.innerHTML = '';
+            drawLine('node-a1', 'node-b1', '#4ade80', 'data-stream', 2);
+            drawLine('node-b1', 'node-c1', '#4ade80', 'data-stream', 2);
+            actionPanel.innerHTML += `<p class="mt-4 text-green-400 text-xs font-mono animate-pulse">> Traffic flowing flawlessly within local boundary.</p>`;
+        }
+
+        // --- Stage 2 Logic (Legacy) ---
+        function simulateLegacy(action) {
+            networkLines.innerHTML = '';
+            const onpremEnv = document.getElementById('env-onprem');
+            const labelOnprem = document.getElementById('label-onprem');
+            const hackerWarning = document.getElementById('hacker-warning');
+            
+            if (action === 'firewall') {
+                // Line hits the firewall and stops
+                const path = drawLine('node-fleet-bottom', 'node-onprem', '#dc2626', '', 3);
+                // Simple animation hack to stop at border
+                path.style.strokeDasharray = "1000";
+                path.style.strokeDashoffset = "1000";
+                path.animate([
+                    { strokeDashoffset: 1000 },
+                    { strokeDashoffset: 600 } // Stops halfway (roughly at firewall boundary)
+                ], { duration: 500, fill: 'forwards', easing: 'ease-out' });
+                
+                onpremEnv.style.animation = "pulse-error 0.5s ease 2";
+                
+                actionPanel.innerHTML += `<p class="mt-4 text-red-400 text-xs font-mono">> CONNECTION REFUSED: Firewall dropping inbound traffic.</p>`;
+                
+                document.getElementById('btn-stack').classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('btn-stack').removeAttribute('disabled');
+            } 
+            else if (action === 'stack') {
+                // "Light up" the legacy stack components
+                const lb = document.getElementById('node-lb');
+                const api = document.getElementById('node-api');
+                lb.className = "w-56 h-10 mt-8 bg-slate-700 border-2 border-slate-400 flex items-center justify-center text-xs font-bold text-white z-20 rounded shadow-md";
+                api.className = "w-56 h-12 mt-4 bg-orange-900/80 border-2 border-orange-500 flex flex-col items-center justify-center text-xs font-bold text-white z-20 rounded shadow-md";
+                api.innerHTML = `<span>L7 API Gateway</span><span class="text-[9px] text-orange-200 font-normal">(Heavy Payload Bottleneck)</span>`;
+
+                const onpremApi = document.getElementById('node-onprem-api');
+                const onpremLb = document.getElementById('node-onprem-lb');
+                onpremApi.className = "w-56 h-10 mt-8 bg-orange-900/80 border-2 border-orange-500 flex items-center justify-center text-xs font-bold text-white z-20 rounded shadow-md";
+                onpremLb.className = "w-56 h-10 mt-4 bg-slate-700 border-2 border-slate-400 flex items-center justify-center text-xs font-bold text-white z-20 rounded shadow-md";
+
+                onpremEnv.className = "absolute bottom-6 right-10 w-72 h-80 firewall-open bg-slate-800/80 rounded-xl p-4 flex flex-col items-center justify-start z-10 transition-all";
+                labelOnprem.innerText = "ON-PREM (PORT OPEN TO VPN)";
+                labelOnprem.className = "absolute top-2 left-3 text-[10px] font-mono text-orange-400";
+                
+                const vpnHub = document.getElementById('env-vpn');
+                vpnHub.classList.remove('hidden');
+                setTimeout(() => vpnHub.classList.remove('opacity-0'), 50);
+
+                // Draw the spaghetti lines
+                // Agents -> LB
+                ['ag1', 'ag2', 'ag3', 'ag4'].forEach(id => {
+                    drawLine(`node-${id}`, 'node-lb', '#94a3b8', 'data-stream-slow', 2);
+                });
+                
+                // LB -> API -> VPN -> OnPrem API -> OnPrem LB -> DB
+                setTimeout(() => {
+                    drawLine('node-lb', 'node-api', '#f59e0b', 'data-stream-slow', 4);
+                    drawLine('node-api', 'node-vpn', '#f59e0b', 'data-stream-slow', 4);
+                    drawLine('node-vpn', 'node-onprem-api', '#f59e0b', 'data-stream-slow', 4);
+                    drawLine('node-onprem-api', 'node-onprem-lb', '#f59e0b', 'data-stream-slow', 4);
+                    drawLine('node-onprem-lb', 'node-onprem', '#f59e0b', 'data-stream-slow', 4);
+                }, 100);
+
+                hackerWarning.classList.remove('hidden');
+
+                actionPanel.innerHTML += `<p class="mt-2 text-orange-400 text-xs font-mono">> Stack deployed. Double the overhead (API GWs & LBs on both sides). Data hairpinned through VPN. High latency. Open ports create lateral movement risk.</p>`;
+            }
+        }
+
+        // --- Stage 3 Logic (Cynapsa Mesh) ---
+        function simulateCynapsa(action) {
+            networkLines.innerHTML = '';
+            if (action === 'connect') {
+                // Draw Mesh Idle Lines
+                drawMeshLineIdle('node-cyn-cloud', 'node-cyn-inst2');
+                drawMeshLineIdle('node-cyn-inst1', 'node-cyn-inst2');
+                drawMeshLineIdle('node-cyn-inst2', 'node-cyn-onprem');
+
+                // Draw Active Load Balanced Path
+                drawLine('node-cyn-cloud', 'node-cyn-inst1', '#22d3ee', 'data-stream-mesh', 3);
+                drawLine('node-cyn-inst1', 'node-cyn-onprem', '#22d3ee', 'data-stream-mesh', 3);
+
+                // Animate nodes pulsing
+                ['cloud', 'inst1', 'inst2', 'onprem'].forEach(id => {
+                    document.getElementById(`node-cyn-${id}`).style.animation = "shield-glow 2s infinite";
+                });
+
+                actionPanel.innerHTML += `<p class="mt-4 text-cyan-400 text-xs font-mono">> Outbound-only mesh established. Traffic routing dynamically to Instance 1 via identity.</p>`;
+                
+                document.getElementById('btn-failover').classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('btn-failover').removeAttribute('disabled');
+            }
+            else if (action === 'failover') {
+                // Kill Instance 1
+                const inst1Node = document.getElementById('node-cyn-inst1');
+                const failX = document.getElementById('fail-x1');
+                
+                inst1Node.classList.remove('border-cyan-500');
+                inst1Node.classList.add('border-slate-600', 'bg-slate-700', 'opacity-50');
+                inst1Node.style.animation = "none";
+                failX.classList.remove('hidden');
+
+                // Visual red lines for broken paths
+                drawLine('node-cyn-cloud', 'node-cyn-inst1', '#ef4444', '', 2, '5 5');
+                drawLine('node-cyn-inst1', 'node-cyn-onprem', '#ef4444', '', 2, '5 5');
+
+                // Draw Mesh Idle Lines (excluding broken inst1)
+                drawMeshLineIdle('node-cyn-inst1', 'node-cyn-inst2'); // Still logically there but broken
+
+                // Simulate NATIVE LOAD BALANCING: instantly routing to Instance 2
+                drawLine('node-cyn-cloud', 'node-cyn-inst2', '#22d3ee', 'data-stream-mesh', 4);
+                drawLine('node-cyn-inst2', 'node-cyn-onprem', '#22d3ee', 'data-stream-mesh', 4);
+
+                actionPanel.innerHTML += `<p class="mt-2 text-green-400 text-xs font-bold font-mono">> NATIVE LOAD BALANCING: Instance 1 failed. The Cynapsa mesh automatically rerouted payloads to Instance 2 without a central load balancer.</p>`;
+            }
+        }
+
+        // --- Helper Function to draw SVG Lines between HTML elements ---
+        function drawLine(id1, id2, color, cssClass, width, dasharray = '') {
+            const el1 = document.getElementById(id1);
+            const el2 = document.getElementById(id2);
+            if (!el1 || !el2) return;
+
+            const rect1 = el1.getBoundingClientRect();
+            const rect2 = el2.getBoundingClientRect();
+            const containerRect = canvasStage.getBoundingClientRect();
+
+            // Calculate centers relative to the canvas container
+            const x1 = rect1.left + rect1.width/2 - containerRect.left;
+            const y1 = rect1.top + rect1.height/2 - containerRect.top;
+            const x2 = rect2.left + rect2.width/2 - containerRect.left;
+            const y2 = rect2.top + rect2.height/2 - containerRect.top;
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('stroke', color);
+            line.setAttribute('stroke-width', width);
+            if (dasharray) line.setAttribute('stroke-dasharray', dasharray);
+            if (cssClass) line.setAttribute('class', cssClass);
+
+            networkLines.appendChild(line);
+            return line;
+        }
+
+        function drawMeshLineIdle(id1, id2) {
+            drawLine(id1, id2, '#334155', 'data-stream-mesh-idle', 2, '4 4');
+        }
+
+        // Initialize
+        window.onload = () => {
+            // Slight delay to ensure DOM sizing is correct before drawing lines
+            setTimeout(() => setStage(1), 100);
+        };
+        
+        // Redraw lines on window resize
+        window.addEventListener('resize', () => {
+            if(currentStage === 1 && document.querySelector('.data-stream')) runStage1Demo();
+        });
+    </script>
+</body>
+</html>
