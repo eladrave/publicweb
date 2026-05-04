@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cynapsa Use Case: Legal Data Confidentiality</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Animations */
+        @keyframes flow-fast {
+            to { stroke-dashoffset: -20; }
+        }
+        @keyframes flow-slow {
+            to { stroke-dashoffset: -20; }
+        }
+        @keyframes pulse-error {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+        }
+        @keyframes shield-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.4); border-color: #22d3ee; }
+            50% { box-shadow: 0 0 25px rgba(34, 211, 238, 0.8); border-color: #fff; }
+        }
+        
+        .data-stream-massive {
+            stroke-dasharray: 15 15;
+            animation: flow-slow 1.5s linear infinite;
+            stroke: #ef4444; /* Red for danger */
+            stroke-width: 8;
+            filter: drop-shadow(0 0 8px #ef4444);
+        }
+        .data-stream-mesh {
+            stroke-dasharray: 6 6;
+            animation: flow-fast 0.4s linear infinite;
+            stroke: #22d3ee; /* Cynapsa Cyan */
+            stroke-width: 3;
+            filter: drop-shadow(0 0 4px #22d3ee);
+        }
+        .data-stream-local {
+            stroke-dasharray: 5 5;
+            animation: flow-fast 0.3s linear infinite;
+            stroke: #4ade80; /* Green for safe/local */
+            stroke-width: 3;
+        }
+
+        .env-box { transition: all 0.5s ease-in-out; }
+        
+        .firewall-solid { border: 4px solid #dc2626; }
+        .firewall-breached { border: 4px dashed #ef4444; box-shadow: inset 0 0 30px rgba(239, 68, 68, 0.3); }
+        .firewall-secure { border: 4px solid #475569; }
+
+        .fade-in { animation: fadeIn 0.5s ease-in forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 font-sans h-screen w-screen overflow-hidden flex">
+
+    <!-- Sidebar Narrative Panel -->
+    <div class="w-1/3 bg-slate-800 border-r border-slate-700 p-8 flex flex-col justify-between z-20 shadow-2xl overflow-y-auto">
+        <div>
+            <div class="mb-8">
+                <div class="text-cyan-400 font-bold tracking-widest text-xs mb-2">CYNAPSA ENTERPRISE USE CASE</div>
+                <h1 class="text-3xl font-bold text-white mb-2 leading-tight">Legal Data <br><span class="text-slate-400">Confidentiality</span></h1>
+                <p class="text-sm text-slate-400">Law firms require AI to parse vast document repositories, but moving client data to the cloud violates strict confidentiality agreements.</p>
+            </div>
+
+            <!-- Stage Navigation -->
+            <div class="space-y-4 relative">
+                <!-- Line connecting steps -->
+                <div class="absolute left-4 top-4 bottom-4 w-0.5 bg-slate-700 -z-10"></div>
+
+                <!-- Legacy Mode Button -->
+                <button onclick="setMode('legacy')" id="btn-legacy" class="w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.15)] relative">
+                    <div id="dot-legacy" class="w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]">1</div>
+                    <div>
+                        <h3 class="text-white font-semibold text-lg">The Cloud-Only Problem</h3>
+                        <p class="text-sm text-slate-400 mt-1">Agent resides in the cloud. Requires full database upload to function.</p>
+                    </div>
+                </button>
+
+                <!-- Cynapsa Mode Button -->
+                <button onclick="setMode('cynapsa')" id="btn-cynapsa" class="w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative">
+                    <div id="dot-cynapsa" class="w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
+                    <div>
+                        <h3 class="text-white font-semibold text-lg">The Cynapsa Solution</h3>
+                        <p class="text-sm text-slate-400 mt-1">Agent runs locally. Only the final answer traverses the mesh.</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Dynamic Action Panel based on Stage -->
+        <div id="action-panel" class="mt-8 p-5 bg-slate-900 rounded-xl border border-slate-700 min-h-[220px] flex flex-col justify-between">
+            <div id="action-content">
+                <!-- Injected via JS -->
+            </div>
+            <button id="execute-btn" onclick="runSimulation()" class="w-full py-3 mt-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded font-bold tracking-wide transition-colors uppercase text-sm">
+                Execute AI Query
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Interactive Canvas -->
+    <div class="w-2/3 bg-[#0a0f1c] relative overflow-hidden" id="canvas-container">
+        
+        <!-- SVG Layer for Network Lines -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" id="network-lines"></svg>
+
+        <!-- Static Canvas Elements (Always visible, position changes) -->
+        <div class="absolute inset-0 p-12">
+            
+            <!-- Cloud Environment -->
+            <div class="absolute top-12 left-1/2 -translate-x-1/2 w-80 h-48 border-2 border-blue-500/30 bg-blue-900/10 rounded-2xl p-4 flex items-center justify-center z-20">
+                <div class="absolute top-3 left-4 text-xs font-mono text-blue-400 font-bold tracking-wider">LEGAL AI CLOUD</div>
+                
+                <div class="flex gap-8 items-center mt-4">
+                    <!-- Orchestrator -->
+                    <div id="node-orchestrator" class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-slate-800 border-2 border-slate-500 rounded-full flex items-center justify-center text-3xl shadow-lg z-30">🧠</div>
+                        <span class="text-xs font-bold text-slate-300 mt-2">Orchestrator</span>
+                    </div>
+
+                    <!-- Cloud Agent Slot (For Legacy) -->
+                    <div id="slot-cloud-agent" class="flex flex-col items-center transition-all duration-500">
+                        <div id="node-agent-cloud" class="w-16 h-16 bg-slate-800 border-2 border-slate-500 rounded-lg flex items-center justify-center text-3xl shadow-lg z-30 transition-all duration-500">📄🤖</div>
+                        <span class="text-xs font-bold text-slate-300 mt-2">Doc Agent</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- On-Premise Environment -->
+            <div id="env-onprem" class="absolute bottom-12 left-1/2 -translate-x-1/2 w-96 h-64 firewall-solid bg-slate-800/60 rounded-2xl p-4 flex flex-col items-center justify-end z-20 transition-all duration-500">
+                <div id="label-onprem" class="absolute top-3 left-4 text-xs font-mono text-slate-400 font-bold tracking-wider">LAW FIRM SERVER (ON-PREM)</div>
+                
+                <div class="w-full flex justify-around items-end pb-4 px-8 h-full">
+                    <!-- Local Agent Slot (For Cynapsa) -->
+                    <div id="slot-local-agent" class="flex flex-col items-center transition-all duration-500 opacity-0 scale-50 translate-y-10">
+                        <div id="node-agent-local" class="w-16 h-16 bg-slate-800 border-2 border-cyan-500 rounded-lg flex items-center justify-center text-3xl shadow-[0_0_15px_#22d3ee] z-30">📄🤖</div>
+                        <span class="text-xs font-bold text-cyan-300 mt-2">Local Doc Agent</span>
+                    </div>
+
+                    <!-- VectorDB -->
+                    <div id="node-db" class="flex flex-col items-center">
+                        <div class="w-20 h-20 bg-slate-900 border-2 border-amber-500/70 rounded-xl flex items-center justify-center text-4xl shadow-[0_0_20px_rgba(245,158,11,0.2)] z-30 relative">
+                            🗄️
+                            <div class="absolute -top-2 -right-2 text-xs bg-red-500 text-white px-1 rounded font-bold">TOP SECRET</div>
+                        </div>
+                        <span class="text-xs font-bold text-amber-400 mt-2 text-center">Client Contracts<br>(VectorDB)</span>
+                    </div>
+                </div>
+
+                <!-- Warning Labels -->
+                <div id="warning-leak" class="absolute -top-6 bg-red-600 text-white font-bold text-sm px-4 py-1 rounded shadow-lg animate-bounce hidden whitespace-nowrap border border-red-400 z-50">
+                    ⚠️ COMPLIANCE VIOLATION: SENSITIVE FILES LEAVING PERIMETER!
+                </div>
+                <div id="warning-success" class="absolute -top-6 bg-cyan-600 text-white font-bold text-sm px-4 py-1 rounded shadow-lg hidden whitespace-nowrap border border-cyan-400 z-50">
+                    ✅ ZERO DATA LEAKAGE: FILES REMAINED ON-PREM
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const networkLines = document.getElementById('network-lines');
+        const actionContent = document.getElementById('action-content');
+        const executeBtn = document.getElementById('execute-btn');
+        let currentMode = 'legacy';
+        let isSimulating = false;
+
+        const uiContent = {
+            legacy: `
+                <h4 class="text-orange-400 font-bold mb-2">The Legacy Challenge</h4>
+                <p class="text-sm text-slate-300 mb-4">Because the Document Agent resides in the cloud, the orchestrator must pull the firm's confidential files across the internet to parse them.</p>
+                <div class="p-3 bg-slate-800 rounded border border-slate-600 text-xs font-mono text-slate-400">
+                    > STATUS: Waiting for user query...<br>
+                    > FIREWALL: Configured to open ports for ingestion.
+                </div>
+            `,
+            cynapsa: `
+                <h4 class="text-cyan-400 font-bold mb-2">The Cynapsa Architecture</h4>
+                <p class="text-sm text-slate-300 mb-4">The firm deploys the Document Agent locally. The Cloud Orchestrator securely delegates the task over the Cynapsa Mesh.</p>
+                <div class="p-3 bg-slate-800 rounded border border-slate-600 text-xs font-mono text-slate-400">
+                    > STATUS: Agent deployed on-premise.<br>
+                    > MESH: P2P connection established. Firewall is DENY ALL.
+                </div>
+            `
+        };
+
+        function setMode(mode) {
+            if (isSimulating) return;
+            currentMode = mode;
+            
+            // UI Toggle Logic
+            const btnLegacy = document.getElementById('btn-legacy');
+            const btnCynapsa = document.getElementById('btn-cynapsa');
+            const dotLegacy = document.getElementById('dot-legacy');
+            const dotCynapsa = document.getElementById('dot-cynapsa');
+
+            if (mode === 'legacy') {
+                btnLegacy.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.15)] relative";
+                dotLegacy.className = "w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]";
+                btnCynapsa.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative";
+                dotCynapsa.className = "w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10";
+                
+                // Move Agent to Cloud
+                document.getElementById('slot-cloud-agent').style.opacity = '1';
+                document.getElementById('slot-cloud-agent').style.transform = 'scale(1) translateY(0)';
+                document.getElementById('slot-local-agent').style.opacity = '0';
+                document.getElementById('slot-local-agent').style.transform = 'scale(0.5) translateY(40px)';
+                
+                document.getElementById('env-onprem').className = "absolute bottom-12 left-1/2 -translate-x-1/2 w-96 h-64 firewall-solid bg-slate-800/60 rounded-2xl p-4 flex flex-col items-center justify-end z-20 transition-all duration-500";
+            } else {
+                btnCynapsa.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.15)] relative";
+                dotCynapsa.className = "w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]";
+                btnLegacy.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative";
+                dotLegacy.className = "w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10";
+
+                // Move Agent to On-Prem
+                document.getElementById('slot-cloud-agent').style.opacity = '0';
+                document.getElementById('slot-cloud-agent').style.transform = 'scale(0.5) translateY(-40px)';
+                document.getElementById('slot-local-agent').style.opacity = '1';
+                document.getElementById('slot-local-agent').style.transform = 'scale(1) translateY(0)';
+
+                document.getElementById('env-onprem').className = "absolute bottom-12 left-1/2 -translate-x-1/2 w-96 h-64 firewall-secure bg-slate-800/60 rounded-2xl p-4 flex flex-col items-center justify-end z-20 transition-all duration-500";
+            }
+
+            // Reset visual state
+            networkLines.innerHTML = '';
+            document.getElementById('warning-leak').classList.add('hidden');
+            document.getElementById('warning-success').classList.add('hidden');
+            document.getElementById('env-onprem').style.animation = 'none';
+            
+            // Update Text
+            actionContent.innerHTML = uiContent[mode];
+            executeBtn.innerText = "Execute AI Query";
+            executeBtn.className = "w-full py-3 mt-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded font-bold tracking-wide transition-colors uppercase text-sm";
+            executeBtn.disabled = false;
+        }
+
+        function runSimulation() {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            executeBtn.innerText = "Simulating...";
+            executeBtn.className = "w-full py-3 mt-4 bg-slate-600 text-white rounded font-bold tracking-wide uppercase text-sm opacity-50 cursor-not-allowed";
+
+            if (currentMode === 'legacy') {
+                // Legcy Animation: Cloud Agent connects directly to On-Prem DB to pull files
+                actionContent.innerHTML = `
+                    <h4 class="text-orange-400 font-bold mb-2">Executing...</h4>
+                    <div class="p-3 bg-slate-800 rounded border border-red-500/50 text-xs font-mono text-red-400">
+                        > Query: "Summarize Acme Corp liabilities"<br>
+                        > ACTION: Cloud Agent requesting full VectorDB sync to parse context...<br>
+                        <span class="animate-pulse">> UPLOADING 50GB CONFIDENTIAL FILES OVER WAN...</span>
+                    </div>
+                `;
+
+                // Draw thick red line
+                setTimeout(() => {
+                    drawLine('node-db', 'node-agent-cloud', 'data-stream-massive');
+                    document.getElementById('env-onprem').classList.remove('firewall-solid');
+                    document.getElementById('env-onprem').classList.add('firewall-breached');
+                    document.getElementById('env-onprem').style.animation = "pulse-error 1s infinite";
+                    document.getElementById('warning-leak').classList.remove('hidden');
+                }, 500);
+
+                setTimeout(() => {
+                    executeBtn.innerText = "Reset";
+                    executeBtn.className = "w-full py-3 mt-4 bg-slate-700 hover:bg-slate-600 text-white rounded font-bold tracking-wide uppercase text-sm";
+                    executeBtn.disabled = false;
+                    isSimulating = false;
+                }, 3000);
+
+            } else {
+                // Cynapsa Animation: Orchestrator -> Local Agent -> Local DB -> Orchestrator
+                actionContent.innerHTML = `
+                    <h4 class="text-cyan-400 font-bold mb-2">Executing over Mesh...</h4>
+                    <div class="p-3 bg-slate-800 rounded border border-cyan-500/50 text-xs font-mono text-cyan-400 min-h-[6rem]">
+                        <span id="log0">> Query: "Summarize Acme Corp liabilities"</span><br>
+                        <span id="log1" class="hidden">> Orchestrator delegates query via Mesh...</span><br>
+                        <span id="log2" class="hidden">> Local Agent parsing 50GB VectorDB on-prem...</span><br>
+                        <span id="log3" class="hidden text-green-400 font-bold mt-1 block">> Returning Answer: "Acme Corp holds $2M in pending litigation liability."</span>
+                    </div>
+                `;
+
+                // Step 1: Cloud Orchestrator to Local Agent
+                setTimeout(() => {
+                    document.getElementById('log1').classList.remove('hidden');
+                    drawLine('node-orchestrator', 'node-agent-local', 'data-stream-mesh', 'req-line');
+                    document.getElementById('node-agent-local').style.animation = "shield-glow 1s infinite";
+                }, 500);
+
+                // Step 2: Local Agent to Local DB (Green Line)
+                setTimeout(() => {
+                    document.getElementById('log2').classList.remove('hidden');
+                    drawLine('node-agent-local', 'node-db', 'data-stream-local', 'local-line');
+                }, 1500);
+
+                // Step 3: Local Agent returns answer to Orchestrator
+                setTimeout(() => {
+                    document.getElementById('log3').classList.remove('hidden');
+                    // Remove the request and local lines to clean up UI
+                    networkLines.innerHTML = ''; 
+                    drawLine('node-agent-local', 'node-orchestrator', 'data-stream-mesh', 'res-line');
+                    
+                    document.getElementById('warning-success').classList.remove('hidden');
+                    document.getElementById('warning-success').innerHTML = '✅ ONLY ANSWER RETURNED. 0 BYTES OF RAW FILES EXPOSED.';
+                    
+                    // Stop agent glow
+                    setTimeout(() => { document.getElementById('node-agent-local').style.animation = "none"; }, 1000);
+
+                    executeBtn.innerText = "Reset";
+                    executeBtn.className = "w-full py-3 mt-4 bg-slate-700 hover:bg-slate-600 text-white rounded font-bold tracking-wide uppercase text-sm";
+                    executeBtn.disabled = false;
+                    isSimulating = false;
+                }, 3000);
+            }
+        }
+
+        // SVG Drawing Helper
+        function drawLine(id1, id2, cssClass, domId = null) {
+            const el1 = document.getElementById(id1);
+            const el2 = document.getElementById(id2);
+            if (!el1 || !el2) return;
+
+            const rect1 = el1.getBoundingClientRect();
+            const rect2 = el2.getBoundingClientRect();
+            const containerRect = document.getElementById('canvas-container').getBoundingClientRect();
+
+            const x1 = rect1.left + rect1.width/2 - containerRect.left;
+            const y1 = rect1.top + rect1.height/2 - containerRect.top;
+            const x2 = rect2.left + rect2.width/2 - containerRect.left;
+            const y2 = rect2.top + rect2.height/2 - containerRect.top;
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('class', cssClass);
+            if(domId) line.setAttribute('id', domId);
+
+            networkLines.appendChild(line);
+            return line;
+        }
+
+        // Init
+        window.onload = () => {
+            setMode('legacy');
+        };
+
+        // Handle resize redraw if needed
+        window.addEventListener('resize', () => {
+            if(!isSimulating && executeBtn.innerText === "Reset") {
+                setMode(currentMode);
+            }
+        });
+    </script>
+</body>
+</html>
