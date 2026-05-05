@@ -334,18 +334,24 @@
                 const btn = document.getElementById(`btn-step${num}`);
                 const dot = document.getElementById(`dot-step${num}`);
                 if (num === stageNum) {
-                    btn.className = "w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.1)] relative group";
-                    dot.className = "w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]";
-                    btn.querySelector('h3').classList.replace('text-slate-300', 'text-white');
+                    btn?.classList.remove('border-transparent');
+                    btn?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                    dot?.classList.replace('bg-slate-800', 'bg-cyan-500');
+                    dot?.classList.replace('text-slate-500', 'text-slate-900');
+                    dot?.classList.add('shadow-[0_0_10px_#22d3ee]');
+                    btn?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
                 } else {
-                    btn.className = "w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-transparent hover:bg-slate-800/50 relative group";
-                    dot.className = "w-8 h-8 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10";
-                    btn.querySelector('h3').classList.replace('text-white', 'text-slate-300');
+                    btn?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                    btn?.classList.add('border-transparent');
+                    dot?.classList.replace('bg-cyan-500', 'bg-slate-800');
+                    dot?.classList.replace('text-slate-900', 'text-slate-500');
+                    dot?.classList.remove('shadow-[0_0_10px_#22d3ee]');
+                    btn?.querySelector('h3')?.classList.replace('text-white', 'text-slate-300');
                 }
             });
 
-            actionPanel.innerHTML = stages[stageNum].panelHtml;
-            canvasStage.innerHTML = stages[stageNum].render();
+            if(actionPanel) actionPanel.innerHTML = stages[stageNum].panelHtml;
+            if(canvasStage) canvasStage.innerHTML = stages[stageNum].render();
         }
 
         // --- SIMULATION 1: SECURITY ---
@@ -360,61 +366,62 @@
             const agentOnPrem = document.getElementById('node-onprem-agent');
             const onpremEnv = document.getElementById('env-onprem');
             const ccp = document.getElementById('node-ccp');
+            const cloudAgent = document.getElementById('node-cloud-agent');
 
             if (mode === 'legacy') {
-                out.innerHTML = `> Opening inbound port 443 on firewall...<br>> Establishing connection.`;
-                fw.classList.remove('firewall-solid');
-                fw.classList.add('firewall-open');
+                if(out) out.innerHTML = `> Opening inbound port 443 on firewall...<br>> Establishing connection.`;
+                fw?.classList.remove('firewall-solid');
+                fw?.classList.add('firewall-open');
                 
                 drawLine('node-cloud-agent', 'node-fw', 'stream-legacy');
                 drawLine('node-fw', 'node-onprem-agent', 'stream-legacy');
 
                 setTimeout(() => {
-                    out.innerHTML += `<br><span class="text-red-400">> ALERT: Port 443 exploited!</span>`;
-                    hacker.classList.remove('hidden');
-                    setTimeout(() => hacker.classList.remove('opacity-0'), 50);
+                    if(!isSimulating) return;
+                    if(out) out.innerHTML += `<br><span class="text-red-400">> ALERT: Port 443 exploited!</span>`;
+                    hacker?.classList.remove('hidden');
+                    setTimeout(() => hacker?.classList.remove('opacity-0'), 50);
                     
-                    // Move hacker through firewall to on-prem agent
-                    hacker.style.transform = 'translate(280px, 60px)';
+                    if(hacker) hacker.style.transform = 'translate(280px, 60px)';
                     
                     setTimeout(() => {
-                        out.innerHTML += `<br><span class="text-red-400">> LATERAL MOVEMENT DETECTED! Database compromised.</span>`;
-                        agentOnPrem.firstElementChild.classList.replace('border-slate-400', 'border-red-500');
-                        db.firstElementChild.classList.replace('border-slate-400', 'border-red-500');
-                        onpremEnv.style.animation = 'pulse-error 1s infinite';
-                        document.getElementById('alert-msg').classList.remove('opacity-0');
+                        if(!isSimulating) return;
+                        if(out) out.innerHTML += `<br><span class="text-red-400">> LATERAL MOVEMENT DETECTED! Database compromised.</span>`;
+                        agentOnPrem?.firstElementChild?.classList.replace('border-slate-400', 'border-red-500');
+                        db?.firstElementChild?.classList.replace('border-slate-400', 'border-red-500');
+                        if(onpremEnv) onpremEnv.style.animation = 'pulse-error 1s infinite';
+                        document.getElementById('alert-msg')?.classList.remove('opacity-0');
                         setTimeout(() => resetSimulation(1), 4000);
                     }, 1200);
                 }, 1500);
 
             } else {
-                out.innerHTML = `> Initiating Out-of-Band Auth via Cynapsa Control Plane...`;
-                ccp.classList.remove('opacity-0');
+                if(out) out.innerHTML = `> Initiating Out-of-Band Auth via Cynapsa Control Plane...`;
+                ccp?.classList.remove('opacity-0');
                 
-                // Auth step
                 drawLine('node-cloud-agent', 'node-ccp', 'stream-auth', 'auth1');
                 drawLine('node-onprem-agent', 'node-ccp', 'stream-auth', 'auth2');
 
                 setTimeout(() => {
-                    out.innerHTML += `<br>> Cryptographic Identity Verified.<br>> P2P Mesh established (Outbound only). Firewall remains Deny-All.`;
+                    if(!isSimulating) return;
+                    if(out) out.innerHTML += `<br>> Cryptographic Identity Verified.<br>> P2P Mesh established (Outbound only). Firewall remains Deny-All.`;
                     
-                    // Clear auth lines, draw mesh
                     networkLines.innerHTML = '';
                     drawLine('node-cloud-agent', 'node-onprem-agent', 'stream-cynapsa');
                     
-                    // Visual feedback
-                    document.getElementById('node-cloud-agent').classList.replace('border-slate-500', 'border-cyan-500');
-                    document.getElementById('node-cloud-agent').style.animation = "shield-glow 2s infinite";
-                    agentOnPrem.firstElementChild.classList.replace('border-slate-400', 'border-cyan-500');
-                    agentOnPrem.firstElementChild.style.animation = "shield-glow 2s infinite";
+                    cloudAgent?.classList.replace('border-slate-500', 'border-cyan-500');
+                    if(cloudAgent) cloudAgent.style.animation = "shield-glow 2s infinite";
+                    
+                    agentOnPrem?.firstElementChild?.classList.replace('border-slate-400', 'border-cyan-500');
+                    if(agentOnPrem?.firstElementChild) agentOnPrem.firstElementChild.style.animation = "shield-glow 2s infinite";
 
-                    // Hacker tries but fails
-                    hacker.classList.remove('hidden');
-                    hacker.style.transform = 'translate(100px, 0)'; // Stuck outside FW
-                    setTimeout(() => hacker.style.opacity = '1', 50);
+                    hacker?.classList.remove('hidden');
+                    if(hacker) hacker.style.transform = 'translate(100px, 0)';
+                    setTimeout(() => { if(hacker) hacker.style.opacity = '1'; }, 50);
                     
                     setTimeout(() => {
-                        out.innerHTML += `<br><span class="text-green-400">> SUCCESS: Zero Trust maintained. Attack thwarted.</span>`;
+                        if(!isSimulating) return;
+                        if(out) out.innerHTML += `<br><span class="text-green-400">> SUCCESS: Zero Trust maintained. Attack thwarted.</span>`;
                         setTimeout(() => resetSimulation(1), 4000);
                     }, 1500);
 
@@ -433,44 +440,47 @@
             const slotLocalAnalyzer = document.getElementById('slot-local-analyzer');
 
             if (mode === 'legacy') {
-                out.innerHTML = `> VPN Tunnel active.<br>> Orchestrator initiating 10TB PHI Data pull to Cloud Analyzer...`;
+                if(out) out.innerHTML = `> VPN Tunnel active.<br>> Orchestrator initiating 10TB PHI Data pull to Cloud Analyzer...`;
                 
                 const line = drawLine('node-massive-db', 'node-analyzer-cloud', 'stream-danger');
                 
                 setTimeout(() => {
-                    out.innerHTML += `<br><span class="text-red-400">> ERROR: Massive Latency.</span><br><span class="text-red-500 font-bold">> FATAL: Data Sovereignty / HIPAA Violation. Data left perimeter.</span>`;
-                    vault.style.animation = "shake 0.5s infinite";
-                    vault.classList.replace('border-amber-500', 'border-red-500');
-                    vault.style.boxShadow = "0 0 30px rgba(239, 68, 68, 0.6)";
+                    if(!isSimulating) return;
+                    if(out) out.innerHTML += `<br><span class="text-red-400">> ERROR: Massive Latency.</span><br><span class="text-red-500 font-bold">> FATAL: Data Sovereignty / HIPAA Violation. Data left perimeter.</span>`;
+                    if(vault) vault.style.animation = "shake 0.5s infinite";
+                    vault?.classList.replace('border-amber-500', 'border-red-500');
+                    if(vault) vault.style.boxShadow = "0 0 30px rgba(239, 68, 68, 0.6)";
                     
                     setTimeout(() => resetSimulation(2), 4000);
                 }, 2000);
 
             } else {
-                out.innerHTML = `> Cynapsa Strategy: Move the Agent to the Data.`;
+                if(out) out.innerHTML = `> Cynapsa Strategy: Move the Agent to the Data.`;
                 
-                // Move analyzer from cloud to on-prem
-                slotCloudAnalyzer.style.opacity = '0';
-                slotCloudAnalyzer.style.transform = 'scale(0.5) translateY(-40px)';
+                if(slotCloudAnalyzer) slotCloudAnalyzer.style.opacity = '0';
+                if(slotCloudAnalyzer) slotCloudAnalyzer.style.transform = 'scale(0.5) translateY(-40px)';
                 
                 setTimeout(() => {
-                    slotLocalAnalyzer.style.opacity = '1';
-                    slotLocalAnalyzer.style.transform = 'scale(1) translateY(0)';
-                    out.innerHTML += `<br>> Local Analyzer interrogating 10TB VectorDB strictly On-Premise...`;
+                    if(!isSimulating) return;
+                    if(slotLocalAnalyzer) slotLocalAnalyzer.style.opacity = '1';
+                    if(slotLocalAnalyzer) slotLocalAnalyzer.style.transform = 'scale(1) translateY(0)';
+                    if(out) out.innerHTML += `<br>> Local Analyzer interrogating 10TB VectorDB strictly On-Premise...`;
                     
-                    // Local processing line
                     drawLine('node-analyzer-local', 'node-massive-db', 'stream-success', 'local-line');
-                    vault.classList.replace('border-amber-500', 'border-green-500');
+                    vault?.classList.replace('border-amber-500', 'border-green-500');
 
                     setTimeout(() => {
-                        document.getElementById('local-line').remove();
-                        out.innerHTML += `<br>> Insight generated. Sending 2KB answer via secure Mesh back to Orchestrator.`;
+                        if(!isSimulating) return;
+                        document.getElementById('local-line')?.remove();
+                        if(out) out.innerHTML += `<br>> Insight generated. Sending 2KB answer via secure Mesh back to Orchestrator.`;
                         
                         drawLine('node-analyzer-local', 'node-orchestrator', 'stream-cynapsa');
-                        document.getElementById('node-orchestrator').style.animation = "shield-glow 2s infinite";
+                        const orch = document.getElementById('node-orchestrator');
+                        if(orch) orch.style.animation = "shield-glow 2s infinite";
 
                         setTimeout(() => {
-                            out.innerHTML += `<br><span class="text-cyan-400 font-bold">> 100% COMPLIANT. Zero raw data left the perimeter.</span>`;
+                            if(!isSimulating) return;
+                            if(out) out.innerHTML += `<br><span class="text-cyan-400 font-bold">> 100% COMPLIANT. Zero raw data left the perimeter.</span>`;
                             setTimeout(() => resetSimulation(2), 4000);
                         }, 2000);
 
@@ -489,22 +499,25 @@
             const cgnat = document.getElementById('cgnat-wall');
 
             if (mode === 'legacy') {
-                out.innerHTML = `> IT Ticket #4921: Connect AWS, Azure, and On-Prem Edge.<br>> Manual IPsec VPN configuration started...`;
-                gear.style.opacity = '1';
-                gear.style.animation = 'spin 3s linear infinite';
+                if(out) out.innerHTML = `> IT Ticket #4921: Connect AWS, Azure, and On-Prem Edge.<br>> Manual IPsec VPN configuration started...`;
+                if(gear) gear.style.opacity = '1';
+                if(gear) gear.style.animation = 'spin 3s linear infinite';
 
                 setTimeout(() => {
+                    if(!isSimulating) return;
                     drawLine('node-env1', 'node-env2', 'stream-legacy');
-                    out.innerHTML += `<br>> 3 Weeks later: AWS to Azure linked.`;
+                    if(out) out.innerHTML += `<br>> 3 Weeks later: AWS to Azure linked.`;
                     
                     setTimeout(() => {
-                        cgnat.style.opacity = '1';
-                        out.innerHTML += `<br><span class="text-orange-400">> 6 Weeks later: Edge connection blocked by Carrier Grade NAT (CGNAT). Subnet overlap detected.</span>`;
+                        if(!isSimulating) return;
+                        if(cgnat) cgnat.style.opacity = '1';
+                        if(out) out.innerHTML += `<br><span class="text-orange-400">> 6 Weeks later: Edge connection blocked by Carrier Grade NAT (CGNAT). Subnet overlap detected.</span>`;
                         
                         setTimeout(() => {
-                            const errLine = drawLine('node-env2', 'node-env3', 'stream-danger');
-                            out.innerHTML += `<br><span class="text-red-500 font-bold">> FAILURE: Custom networking does not scale. Deployment stalled.</span>`;
-                            gear.style.animation = 'none';
+                            if(!isSimulating) return;
+                            drawLine('node-env2', 'node-env3', 'stream-danger');
+                            if(out) out.innerHTML += `<br><span class="text-red-500 font-bold">> FAILURE: Custom networking does not scale. Deployment stalled.</span>`;
+                            if(gear) gear.style.animation = 'none';
                             
                             setTimeout(() => resetSimulation(3), 4000);
                         }, 1500);
@@ -512,21 +525,26 @@
                 }, 1500);
 
             } else {
-                out.innerHTML = `> Cynapsa Software Overlay deployment initiated...`;
+                if(out) out.innerHTML = `> Cynapsa Software Overlay deployment initiated...`;
                 
                 setTimeout(() => {
-                    out.innerHTML += `<br>> Connecting AWS, Azure, and On-Prem using Identity...`;
+                    if(!isSimulating) return;
+                    if(out) out.innerHTML += `<br>> Connecting AWS, Azure, and On-Prem using Identity...`;
                     drawLine('node-env1', 'node-env2', 'stream-cynapsa');
                     drawLine('node-env2', 'node-env3', 'stream-cynapsa');
                     drawLine('node-env1', 'node-env3', 'stream-cynapsa');
                     
                     ['env1', 'env2', 'env3'].forEach(id => {
-                        document.getElementById(`node-${id}`).firstElementChild.classList.replace('border-slate-500', 'border-cyan-500');
-                        document.getElementById(`node-${id}`).firstElementChild.style.animation = "shield-glow 2s infinite";
+                        const el = document.getElementById(`node-${id}`)?.firstElementChild;
+                        if(el) {
+                            el.classList.replace('border-slate-500', 'border-cyan-500');
+                            el.style.animation = "shield-glow 2s infinite";
+                        }
                     });
 
                     setTimeout(() => {
-                        out.innerHTML += `<br><span class="text-cyan-400 font-bold">> SUCCESS: Full mesh established in minutes. CGNAT traversed seamlessly via outbound tunneling.</span>`;
+                        if(!isSimulating) return;
+                        if(out) out.innerHTML += `<br><span class="text-cyan-400 font-bold">> SUCCESS: Full mesh established in minutes. CGNAT traversed seamlessly via outbound tunneling.</span>`;
                         setTimeout(() => resetSimulation(3), 4000);
                     }, 1000);
                 }, 1000);
@@ -543,33 +561,36 @@
             const gwErr = document.getElementById('gw-error');
 
             if (mode === 'legacy') {
-                out.innerHTML = `> Swarm routing via central API Gateway.<br>> Ag-1 talking to Ag-2...`;
+                if(out) out.innerHTML = `> Swarm routing via central API Gateway.<br>> Ag-1 talking to Ag-2...`;
                 
-                // Agent 1 talks to Agent 2 via GW
                 drawLine('swarm-1', 'node-gateway', 'stream-legacy', 'L1');
-                setTimeout(() => drawLine('node-gateway', 'swarm-2', 'stream-legacy', 'L2'), 500);
+                setTimeout(() => {
+                    if(!isSimulating) return;
+                    drawLine('node-gateway', 'swarm-2', 'stream-legacy', 'L2');
+                }, 500);
 
                 setTimeout(() => {
-                    out.innerHTML += `<br>> Load increasing. Adding DB traffic...`;
+                    if(!isSimulating) return;
+                    if(out) out.innerHTML += `<br>> Load increasing. Adding DB traffic...`;
                     drawLine('swarm-4', 'node-gateway', 'stream-legacy', 'L3');
                     drawLine('node-gateway', 'node-target', 'stream-legacy', 'L4');
                     drawLine('swarm-5', 'node-gateway', 'stream-legacy', 'L5');
                     
                     setTimeout(() => {
-                        gw.classList.replace('border-slate-500', 'border-red-500');
-                        gw.style.animation = "pulse-error 0.5s infinite";
-                        gwErr.classList.remove('hidden');
-                        out.innerHTML += `<br><span class="text-orange-400">> BOTTLENECK: API Gateway choking on high-frequency payloads.</span>`;
+                        if(!isSimulating) return;
+                        gw?.classList.replace('border-slate-500', 'border-red-500');
+                        if(gw) gw.style.animation = "pulse-error 0.5s infinite";
+                        gwErr?.classList.remove('hidden');
+                        if(out) out.innerHTML += `<br><span class="text-orange-400">> BOTTLENECK: API Gateway choking on high-frequency payloads.</span>`;
                         
-                        // Blast Radius!
                         setTimeout(() => {
-                            out.innerHTML += `<br><span class="text-red-500 font-bold">> BREACH: Ag-3 Compromised. Lateral movement sweeping shared subnet!</span>`;
+                            if(!isSimulating) return;
+                            if(out) out.innerHTML += `<br><span class="text-red-500 font-bold">> BREACH: Ag-3 Compromised. Lateral movement sweeping shared subnet!</span>`;
                             const ag3 = document.getElementById('swarm-3');
-                            ag3.classList.replace('bg-slate-800', 'bg-red-800');
-                            ag3.classList.replace('border-slate-500', 'border-red-500');
-                            ag3.style.animation = "bounce-lateral 0.5s infinite";
+                            ag3?.classList.replace('bg-slate-800', 'bg-red-800');
+                            ag3?.classList.replace('border-slate-500', 'border-red-500');
+                            if(ag3) ag3.style.animation = "bounce-lateral 0.5s infinite";
                             
-                            // Shoots red lines to everyone
                             drawLine('swarm-3', 'swarm-1', 'stream-danger');
                             drawLine('swarm-3', 'swarm-2', 'stream-danger');
                             drawLine('swarm-3', 'swarm-4', 'stream-danger');
@@ -582,45 +603,46 @@
                 }, 1500);
 
             } else {
-                out.innerHTML = `> Cynapsa Agentic Microsegmentation active.<br>> Ag-1 talking to Ag-2...`;
-                gw.style.opacity = '0.2'; // Bypassed
+                if(out) out.innerHTML = `> Cynapsa Agentic Microsegmentation active.<br>> Ag-1 talking to Ag-2...`;
+                if(gw) gw.style.opacity = '0.2';
                 
-                // Direct P2P
                 drawLine('swarm-1', 'swarm-2', 'stream-cynapsa', 'C1');
-                document.getElementById('swarm-1').classList.replace('border-slate-500', 'border-cyan-500');
-                document.getElementById('swarm-2').classList.replace('border-slate-500', 'border-cyan-500');
+                document.getElementById('swarm-1')?.classList.replace('border-slate-500', 'border-cyan-500');
+                document.getElementById('swarm-2')?.classList.replace('border-slate-500', 'border-cyan-500');
 
                 setTimeout(() => {
-                    out.innerHTML += `<br>> Ag-4 and Ag-5 talking to DB...`;
+                    if(!isSimulating) return;
+                    if(out) out.innerHTML += `<br>> Ag-4 and Ag-5 talking to DB...`;
                     drawLine('swarm-4', 'node-target', 'stream-cynapsa', 'C2');
                     drawLine('swarm-5', 'node-target', 'stream-cynapsa', 'C3');
-                    document.getElementById('swarm-4').classList.replace('border-slate-500', 'border-cyan-500');
-                    document.getElementById('swarm-5').classList.replace('border-slate-500', 'border-cyan-500');
-                    document.getElementById('node-target').classList.replace('border-slate-500', 'border-cyan-500');
-                    document.getElementById('node-target').style.boxShadow = "0 0 15px rgba(34, 211, 238, 0.4)";
+                    
+                    document.getElementById('swarm-4')?.classList.replace('border-slate-500', 'border-cyan-500');
+                    document.getElementById('swarm-5')?.classList.replace('border-slate-500', 'border-cyan-500');
+                    const target = document.getElementById('node-target');
+                    target?.classList.replace('border-slate-500', 'border-cyan-500');
+                    if(target) target.style.boxShadow = "0 0 15px rgba(34, 211, 238, 0.4)";
 
-                    out.innerHTML += `<br>> Zero central bottleneck. Infinite scale.`;
+                    if(out) out.innerHTML += `<br>> Zero central bottleneck. Infinite scale.`;
 
-                    // Blast Radius contained
                     setTimeout(() => {
-                        out.innerHTML += `<br><span class="text-orange-400">> ALERT: Ag-3 Compromised.</span>`;
+                        if(!isSimulating) return;
+                        if(out) out.innerHTML += `<br><span class="text-orange-400">> ALERT: Ag-3 Compromised.</span>`;
                         const ag3 = document.getElementById('swarm-3');
-                        ag3.classList.replace('bg-slate-800', 'bg-red-800');
-                        ag3.classList.replace('border-slate-500', 'border-red-500');
+                        ag3?.classList.replace('bg-slate-800', 'bg-red-800');
+                        ag3?.classList.replace('border-slate-500', 'border-red-500');
                         
                         setTimeout(() => {
-                            out.innerHTML += `<br><span class="text-green-400 font-bold">> CONTAINED: Ag-3 isolated. Cynapsa drops unauthorized P2P requests. Blast radius = 0.</span>`;
+                            if(!isSimulating) return;
+                            if(out) out.innerHTML += `<br><span class="text-green-400 font-bold">> CONTAINED: Ag-3 isolated. Cynapsa drops unauthorized P2P requests. Blast radius = 0.</span>`;
                             
-                            // Visualize blocked connections
                             const block1 = drawLine('swarm-3', 'swarm-2', 'stream-danger');
                             const block2 = drawLine('swarm-3', 'swarm-4', 'stream-danger');
                             
-                            // Animate them disappearing to show they were dropped
-                            block1.style.animation = "flow-fast 0.2s linear forwards";
-                            block2.style.animation = "flow-fast 0.2s linear forwards";
+                            if(block1) block1.style.animation = "flow-fast 0.2s linear forwards";
+                            if(block2) block2.style.animation = "flow-fast 0.2s linear forwards";
                             setTimeout(() => {
-                                if(block1) block1.remove();
-                                if(block2) block2.remove();
+                                block1?.remove();
+                                block2?.remove();
                             }, 500);
 
                             setTimeout(() => resetSimulation(4), 5000);
