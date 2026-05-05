@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cynapsa: Agentic Microsegmentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Core Animations */
+        @keyframes pulse-error {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+        }
+        @keyframes pulse-warning {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); }
+        }
+        
+        /* Mesh Colors - Glow Effects */
+        @keyframes glow-green {
+            0%, 100% { box-shadow: 0 0 10px rgba(74, 222, 128, 0.4); border-color: #4ade80; }
+            50% { box-shadow: 0 0 20px rgba(74, 222, 128, 0.8); border-color: #22c55e; }
+        }
+        @keyframes glow-blue {
+            0%, 100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); border-color: #38bdf8; }
+            50% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.8); border-color: #0ea5e9; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px) rotate(-4deg); }
+            75% { transform: translateX(4px) rotate(4deg); }
+        }
+
+        /* Line Styles */
+        @keyframes flow-fast { to { stroke-dashoffset: -20; } }
+        @keyframes flow-slow { to { stroke-dashoffset: -20; } }
+
+        .vpn-pipe { stroke: #475569; stroke-width: 8; opacity: 0.4; stroke-linecap: round; }
+        .stream-legacy { stroke-dasharray: 6 6; stroke: #94a3b8; stroke-width: 2; opacity: 0.3; }
+        .stream-legacy-active { stroke-dasharray: 8 8; animation: flow-slow 1s linear infinite; stroke: #f59e0b; stroke-width: 3; opacity: 1; filter: drop-shadow(0 0 4px #f59e0b); }
+        .stream-danger { stroke-dasharray: 12 12; animation: flow-fast 0.6s linear infinite; stroke: #ef4444; stroke-width: 4; filter: drop-shadow(0 0 4px #ef4444); }
+        .stream-auth { stroke-dasharray: 4 4; animation: flow-fast 0.6s linear infinite; stroke: #a855f7; stroke-width: 2; }
+        
+        .stream-p2p-green { stroke-dasharray: 6 6; animation: flow-fast 0.4s linear infinite; stroke: #4ade80; stroke-width: 3; filter: drop-shadow(0 0 5px #4ade80); opacity: 1; }
+        .stream-p2p-blue { stroke-dasharray: 6 6; animation: flow-fast 0.4s linear infinite; stroke: #38bdf8; stroke-width: 3; filter: drop-shadow(0 0 5px #38bdf8); opacity: 1; }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Agent Base */
+        .agent-node { transition: all 0.5s ease; position: relative; z-index: 20; }
+        .agent-node.hacked { background-color: #7f1d1d !important; border-color: #ef4444 !important; animation: pulse-error 1s infinite !important; }
+        
+        /* Mesh Highlight Classes */
+        .highlight-green {
+            opacity: 1 !important;
+            transform: scale(1.15);
+            border-color: #4ade80 !important;
+            box-shadow: 0 0 25px rgba(74, 222, 128, 0.6) !important;
+        }
+        .highlight-blue {
+            opacity: 1 !important;
+            transform: scale(1.15);
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.6) !important;
+        }
+        .dimmed { opacity: 0.15 !important; filter: grayscale(100%); transition: all 0.5s ease; }
+
+        /* Checklist styles */
+        .check-item { opacity: 0.3; transition: all 0.3s ease; }
+        .check-item.active { opacity: 1; color: #4ade80; }
+        .check-item.failed { opacity: 1; color: #ef4444; }
+        .check-item.active::before { content: '✓ '; }
+        .check-item.failed::before { content: '✗ '; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 font-sans h-screen w-screen overflow-hidden flex">
+
+    <!-- Sidebar Narrative Panel -->
+    <div class="w-1/3 bg-slate-900 border-r border-slate-800 p-8 flex flex-col justify-between z-30 shadow-[10px_0_30px_rgba(0,0,0,0.5)] overflow-y-auto">
+        <div>
+            <div class="mb-6 border-b border-slate-800 pb-6">
+                <div class="text-cyan-400 font-bold tracking-widest text-[10px] mb-2 uppercase">Agentic Microsegmentation</div>
+                <h1 class="text-3xl font-bold text-white mb-2 leading-tight">Proximity Does Not <br><span class="text-slate-400">Equal Trust</span></h1>
+                <p class="text-sm text-slate-400 mt-3">Legacy networking relies on hub-and-spoke VPNs, bridging entire locations. Cynapsa replaces location-based trust with strict, identity-based P2P routing restricted to specific Mesh contexts.</p>
+            </div>
+
+            <!-- Architecture Toggle -->
+            <div class="space-y-3 relative mb-6">
+                <div class="absolute left-[15px] top-4 bottom-4 w-0.5 bg-slate-800 -z-10"></div>
+
+                <button onclick="setMode('legacy')" id="btn-legacy" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.1)] relative group">
+                    <div id="dot-legacy" class="w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]">1</div>
+                    <div>
+                        <h3 class="text-white font-semibold text-md">Before Cynapsa (Hub & Spoke)</h3>
+                        <p class="text-xs text-slate-400 mt-1">Locations connect to VPN. Any-to-Any access creates massive blast radiuses.</p>
+                    </div>
+                </button>
+
+                <button onclick="setMode('cynapsa')" id="btn-cynapsa" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-transparent hover:bg-slate-800/50 relative group">
+                    <div id="dot-cynapsa" class="w-8 h-8 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
+                    <div>
+                        <h3 class="text-slate-300 group-hover:text-white font-semibold text-md">With Cynapsa (Identity Mesh)</h3>
+                        <p class="text-xs text-slate-500 group-hover:text-slate-400 mt-1">Out-of-band auth. P2P routing strictly limited by designated Mesh contexts.</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Action Panel -->
+        <div id="action-panel" class="mt-2 p-5 bg-slate-950 rounded-xl border border-slate-800 flex flex-col min-h-[280px]">
+            <!-- Injected via JS -->
+        </div>
+    </div>
+
+    <!-- Main Interactive Canvas -->
+    <div class="w-2/3 bg-[#050811] relative overflow-hidden flex items-center justify-center" id="canvas-container">
+        <!-- Background Grid -->
+        <div class="absolute inset-0 z-0 opacity-20" style="background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px); background-size: 30px 30px;"></div>
+        
+        <!-- SVG Layer for Network Lines -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" id="network-lines"></svg>
+
+        <!-- Static Environment Layout -->
+        <div class="w-full h-full relative z-20 p-8">
+            
+            <!-- AWS Region (5 Agents) -->
+            <div id="env-aws-box" class="absolute top-8 left-8 w-[32%] h-[40%] border-2 border-slate-700 bg-slate-800/30 rounded-xl p-3 flex flex-col items-center">
+                <div class="text-[10px] font-mono text-slate-400 mb-2">AWS CLOUD (VPC)</div>
+                <div class="flex flex-wrap gap-3 items-center justify-center flex-grow" id="env-aws"></div>
+                <div id="gw-aws" class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-8 bg-slate-600 rounded-sm z-30 flex items-center justify-center transition-all opacity-0"><span class="text-[8px] -rotate-90">GW</span></div>
+            </div>
+
+            <!-- GCP Region (4 Agents) -->
+            <div id="env-gcp-box" class="absolute top-8 right-8 w-[32%] h-[40%] border-2 border-slate-700 bg-slate-800/30 rounded-xl p-3 flex flex-col items-center">
+                <div class="text-[10px] font-mono text-slate-400 mb-2">GCP CLOUD (VPC)</div>
+                <div class="flex flex-wrap gap-3 items-center justify-center flex-grow" id="env-gcp"></div>
+                <div id="gw-gcp" class="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-8 bg-slate-600 rounded-sm z-30 flex items-center justify-center transition-all opacity-0"><span class="text-[8px] rotate-90">GW</span></div>
+            </div>
+
+            <!-- On-Premise (3 Agents) -->
+            <div id="env-onp-box" class="absolute bottom-8 left-8 w-[32%] h-[40%] border-2 border-slate-700 bg-slate-800/30 rounded-xl p-3 flex flex-col items-center">
+                <div class="text-[10px] font-mono text-slate-400 mb-2">ON-PREMISE (DATACENTER)</div>
+                <div class="flex flex-wrap gap-3 items-center justify-center flex-grow" id="env-onp"></div>
+                <div id="gw-onp" class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-8 bg-slate-600 rounded-sm z-30 flex items-center justify-center transition-all opacity-0"><span class="text-[8px] -rotate-90">GW</span></div>
+            </div>
+
+            <!-- Local Machine (2 Agents) -->
+            <div id="env-lap-box" class="absolute bottom-8 right-8 w-[32%] h-[40%] border-2 border-slate-700 bg-slate-800/30 rounded-xl p-3 flex flex-col items-center">
+                <div class="text-[10px] font-mono text-slate-400 mb-2">LOCAL NETWORK (ROAMING)</div>
+                <div class="flex flex-wrap gap-3 items-center justify-center flex-grow relative w-full h-full" id="env-lap"></div>
+                <div id="gw-lap" class="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-8 bg-slate-600 rounded-sm z-30 flex items-center justify-center transition-all opacity-0"><span class="text-[8px] rotate-90">GW</span></div>
+            </div>
+
+            <!-- Central Hub (Used only in Legacy) -->
+            <div id="node-vpn-hub" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-slate-800 border-2 border-orange-500 rounded-full flex flex-col items-center justify-center z-30 transition-all duration-500 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+                <span class="text-2xl">🚦</span>
+                <span class="text-[10px] font-bold text-orange-400 mt-1 text-center">VPN HUB<br>(Any-to-Any)</span>
+            </div>
+
+            <!-- CCP Hub (Used only in Cynapsa) -->
+            <div id="node-ccp" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-40 transition-all duration-500 opacity-0 scale-50 pointer-events-none">
+                <div class="w-24 h-24 bg-slate-800 border-2 border-purple-500 rounded-full flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(168,85,247,0.4)] relative">
+                    🧠
+                    <!-- CCP Checklist UI -->
+                    <div id="ccp-checklist" class="absolute top-full mt-4 w-64 bg-slate-800 border border-purple-500/50 rounded-lg p-3 text-[10px] font-mono shadow-2xl opacity-0 transition-opacity duration-300">
+                        <div class="text-purple-400 font-bold mb-2 uppercase border-b border-slate-700 pb-1">Context Authorization</div>
+                        <div id="chk-1" class="check-item mb-1">1. Cryptographic Identity</div>
+                        <div id="chk-2" class="check-item mb-1">2. Same Mesh Context</div>
+                        <div id="chk-3" class="check-item">3. Role-Based Topology</div>
+                    </div>
+                </div>
+                <span class="text-[10px] font-bold text-purple-300 mt-2 text-center bg-slate-900/80 px-2 py-1 rounded">Cynapsa Control Plane</span>
+            </div>
+            
+            <!-- Mesh Legend -->
+            <div id="mesh-legend" class="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-24 pointer-events-none opacity-0 transition-opacity duration-500 z-10 flex flex-col items-center justify-center">
+                <div class="bg-slate-900/90 border border-slate-700 rounded-lg p-3 text-center shadow-xl">
+                    <div class="text-xs font-bold text-white mb-2">Microsegmentation Meshes</div>
+                    <div class="flex gap-4">
+                        <div class="flex items-center text-[10px] font-bold text-green-400"><span class="w-3 h-3 rounded-full bg-green-500 mr-1 shadow-[0_0_5px_#4ade80]"></span> Finance Mesh</div>
+                        <div class="flex items-center text-[10px] font-bold text-blue-400"><span class="w-3 h-3 rounded-full bg-blue-500 mr-1 shadow-[0_0_5px_#38bdf8]"></span> R&D Mesh</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvasStage = document.getElementById('canvas-stage');
+        const networkLines = document.getElementById('network-lines');
+        const actionPanel = document.getElementById('action-panel');
+
+        let currentMode = 'legacy';
+        let isSimulating = false;
+
+        // Data definition for 14 agents
+        const agentsData = {
+            aws: [
+                { id: 'aws-1', icon: '🤖', mesh: 'green' }, { id: 'aws-2', icon: '🤖', mesh: 'green' }, 
+                { id: 'aws-3', icon: '🤖', mesh: 'blue' }, { id: 'aws-4', icon: '🤖', mesh: 'blue' }, 
+                { id: 'aws-5', icon: '🤖', mesh: 'purple' }
+            ],
+            gcp: [
+                { id: 'gcp-1', icon: '🤖', mesh: 'green' }, { id: 'gcp-2', icon: '🤖', mesh: 'green' }, 
+                { id: 'gcp-3', icon: '🤖', mesh: 'blue' }, { id: 'gcp-4', icon: '🤖', mesh: 'purple' }
+            ],
+            onp: [
+                { id: 'onp-1', icon: '🗄️', mesh: 'green' }, { id: 'onp-2', icon: '🗄️', mesh: 'blue' }, 
+                { id: 'onp-3', icon: '🗄️', mesh: 'purple' }
+            ],
+            lap: [
+                { id: 'lap-1', icon: '💻', mesh: 'green' }, { id: 'lap-2', icon: '💻', mesh: 'blue' }
+            ]
+        };
+
+        const uiPanels = {
+            legacy: `
+                <div class="flex-grow">
+                    <h4 class="text-orange-400 font-bold mb-2 uppercase text-[11px] tracking-widest">Legacy Hub & Spoke VPN</h4>
+                    <p class="text-sm text-slate-300 mb-2">Notice the thick VPN pipes connecting the <span class="italic text-white">locations</span> to the Hub. Because the network connects sites, it inherently provides <span class="font-bold text-red-400">Any-to-Any</span> access to all agents inside.</p>
+                    <div id="terminal-out" class="p-2 bg-slate-900 rounded border border-slate-700 text-xs font-mono text-slate-400 min-h-[5rem] overflow-y-auto">
+                        > VPN Hub Active.<br>> 4 Environments securely bridged.<br>> Awaiting workflow...
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4 flex-wrap">
+                    <button onclick="runLegacyFlow()" class="flex-1 min-w-[30%] py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] sm:text-xs transition-colors border border-slate-600">1. Valid Flow</button>
+                    <button onclick="runLegacyBreach()" class="flex-1 min-w-[30%] py-2 bg-red-900 hover:bg-red-800 text-white rounded text-[10px] sm:text-xs transition-colors border border-red-500 font-bold shadow-[0_0_10px_rgba(239,68,68,0.3)]">2. Breach Spread</button>
+                    <button onclick="runLegacyShadow()" class="flex-1 min-w-[30%] py-2 bg-orange-900 hover:bg-orange-800 text-white rounded text-[10px] sm:text-xs transition-colors border border-orange-500 font-bold shadow-[0_0_10px_rgba(245,158,11,0.3)]">3. Shadow Agent</button>
+                </div>
+            `,
+            cynapsa: `
+                <div class="flex-grow">
+                    <h4 class="text-cyan-400 font-bold mb-2 uppercase text-[11px] tracking-widest">Agentic Microsegmentation</h4>
+                    <p class="text-sm text-slate-300 mb-2">The central hub is gone. Agents belong to Identity Meshes completely independent of their physical location. Out-of-band authorization blocks cross-mesh traffic entirely.</p>
+                    <div id="terminal-out" class="p-2 bg-slate-900 rounded border border-slate-700 text-xs font-mono text-slate-400 min-h-[5rem] overflow-y-auto">
+                        > Cynapsa Control Plane Active.<br>> Identity boundaries enforced.<br>> Awaiting workflow...
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4 flex-wrap">
+                    <button onclick="runCynapsaFlow()" class="flex-1 min-w-[30%] py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] sm:text-xs transition-colors border border-slate-600">1. Mesh Auth</button>
+                    <button onclick="runCynapsaAttack()" class="flex-1 min-w-[30%] py-2 bg-red-900 hover:bg-red-800 text-white rounded text-[10px] sm:text-xs transition-colors border border-red-500 font-bold shadow-[0_0_10px_rgba(239,68,68,0.3)]">2. Hacked Agent</button>
+                    <button onclick="runCynapsaShadow()" class="flex-1 min-w-[30%] py-2 bg-orange-900 hover:bg-orange-800 text-white rounded text-[10px] sm:text-xs transition-colors border border-orange-500 font-bold shadow-[0_0_10px_rgba(245,158,11,0.3)]">3. Shadow Agent</button>
+                </div>
+            `
+        };
+
+        function renderAgents() {
+            Object.keys(agentsData).forEach(env => {
+                const container = document.getElementById(`env-${env}`);
+                if (!container) return;
+                container.innerHTML = '';
+                
+                agentsData[env].forEach(agent => {
+                    const el = document.createElement('div');
+                    el.id = agent.id;
+                    el.dataset.mesh = agent.mesh; 
+                    el.className = `agent-node w-10 h-10 bg-slate-800 border-2 border-slate-500 rounded-full flex flex-col items-center justify-center text-lg shadow-lg relative`;
+                    
+                    if (agent.icon === '🗄️') el.classList.replace('rounded-full', 'rounded-lg');
+                    if (agent.icon === '💻') el.classList.replace('rounded-full', 'rounded-xl');
+
+                    // Default text
+                    el.innerHTML = `${agent.icon}<span class="absolute -bottom-4 text-[7px] text-slate-400 font-bold whitespace-nowrap">${agent.id}</span>`;
+                    container.appendChild(el);
+                });
+            });
+        }
+
+        function setMode(mode) {
+            if (isSimulating) return;
+            currentMode = mode;
+            networkLines.innerHTML = '';
+            
+            // Toggle sidebar buttons
+            const btnLegacy = document.getElementById('btn-legacy');
+            const btnCynapsa = document.getElementById('btn-cynapsa');
+            const dotLegacy = document.getElementById('dot-legacy');
+            const dotCynapsa = document.getElementById('dot-cynapsa');
+
+            if (mode === 'legacy') {
+                btnLegacy?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotLegacy?.classList.replace('bg-slate-800', 'bg-cyan-500');
+                dotLegacy?.classList.replace('text-slate-500', 'text-slate-900');
+                btnLegacy?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
+
+                btnCynapsa?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotCynapsa?.classList.replace('bg-cyan-500', 'bg-slate-800');
+                dotCynapsa?.classList.replace('text-slate-900', 'text-slate-500');
+                btnCynapsa?.querySelector('h3')?.classList.replace('text-white', 'text-slate-300');
+
+                // Visuals
+                document.getElementById('node-vpn-hub').style.opacity = '1';
+                document.getElementById('node-vpn-hub').style.transform = 'translate(-50%, -50%) scale(1)';
+                document.getElementById('node-ccp').style.opacity = '0';
+                document.getElementById('node-ccp').style.transform = 'translate(-50%, -50%) scale(0.5)';
+                document.getElementById('mesh-legend').style.opacity = '0';
+                
+                // Show gateways
+                ['aws', 'gcp', 'onp', 'lap'].forEach(e => {
+                    document.getElementById(`gw-${e}`).style.opacity = '1';
+                });
+
+            } else {
+                btnCynapsa?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotCynapsa?.classList.replace('bg-slate-800', 'bg-cyan-500');
+                dotCynapsa?.classList.replace('text-slate-500', 'text-slate-900');
+                btnCynapsa?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
+
+                btnLegacy?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotLegacy?.classList.replace('bg-cyan-500', 'bg-slate-800');
+                dotLegacy?.classList.replace('text-slate-900', 'text-slate-500');
+                btnLegacy?.querySelector('h3')?.classList.replace('text-white', 'text-slate-300');
+
+                // Visuals
+                document.getElementById('node-vpn-hub').style.opacity = '0';
+                document.getElementById('node-vpn-hub').style.transform = 'translate(-50%, -50%) scale(0.5)';
+                document.getElementById('node-ccp').style.opacity = '1';
+                document.getElementById('node-ccp').style.transform = 'translate(-50%, -50%) scale(1)';
+                document.getElementById('mesh-legend').style.opacity = '1';
+
+                // Hide gateways
+                ['aws', 'gcp', 'onp', 'lap'].forEach(e => {
+                    document.getElementById(`gw-${e}`).style.opacity = '0';
+                });
+            }
+
+            if(actionPanel) actionPanel.innerHTML = uiPanels[mode];
+            renderAgents();
+            
+            if(mode === 'legacy') {
+                setTimeout(() => {
+                    // Draw thick VPN pipes linking locations to hub
+                    ['aws', 'gcp', 'onp', 'lap'].forEach(e => {
+                        drawLine(`gw-${e}`, 'node-vpn-hub', 'vpn-pipe');
+                    });
+                }, 100);
+            }
+        }
+
+        // --- LEGACY SIMULATIONS ---
+
+        function runLegacyFlow() {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            const out = document.getElementById('terminal-out');
+            
+            // Redraw pipes
+            ['aws', 'gcp', 'onp', 'lap'].forEach(e => drawLine(`gw-${e}`, 'node-vpn-hub', 'vpn-pipe'));
+
+            if(out) out.innerHTML = `> [lap-1] sending request to AWS...<br>> Routing via VPN Gateway...`;
+            
+            // Flow: Agent -> GW -> Hub -> GW -> Target
+            drawLine('lap-1', 'gw-lap', 'stream-legacy-active');
+            setTimeout(() => {
+                if(!isSimulating) return;
+                drawLine('gw-lap', 'node-vpn-hub', 'stream-legacy-active');
+                
+                setTimeout(() => {
+                    if(!isSimulating) return;
+                    drawLine('node-vpn-hub', 'gw-aws', 'stream-legacy-active');
+                    drawLine('gw-aws', 'aws-1', 'stream-legacy-active');
+                    if(out) out.innerHTML += `<br>> <span class="text-orange-400">AWS Agent receives packet. Must independently verify auth/privileges (App Layer burden).</span>`;
+                    
+                    setTimeout(() => { isSimulating = false; }, 2500);
+                }, 800);
+            }, 800);
+        }
+
+        function runLegacyBreach() {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            const out = document.getElementById('terminal-out');
+            
+            ['aws', 'gcp', 'onp', 'lap'].forEach(e => drawLine(`gw-${e}`, 'node-vpn-hub', 'vpn-pipe'));
+
+            if(out) out.innerHTML = `> <span class="text-red-500 font-bold">BREACH:</span> [gcp-1] compromised by prompt injection.<br>> Exploiting flat network...`;
+            
+            const attackerId = 'gcp-1';
+            document.getElementById(attackerId)?.classList.add('hacked');
+            
+            drawLine(attackerId, 'gw-gcp', 'stream-danger');
+            setTimeout(() => {
+                if(!isSimulating) return;
+                drawLine('gw-gcp', 'node-vpn-hub', 'stream-danger');
+                document.getElementById('node-vpn-hub').style.animation = 'pulse-error 0.5s infinite';
+
+                if(out) out.innerHTML += `<br>> VPN Hub forwards malicious packets globally.`;
+
+                // Spread to all locations
+                setTimeout(() => {
+                    if(!isSimulating) return;
+                    ['aws', 'onp', 'lap'].forEach(loc => {
+                        drawLine('node-vpn-hub', `gw-${loc}`, 'stream-danger');
+                        // Spread to all agents in that location
+                        agentsData[loc].forEach(n => {
+                            setTimeout(() => {
+                                if(!isSimulating) return;
+                                drawLine(`gw-${loc}`, n.id, 'stream-danger');
+                                document.getElementById(n.id)?.classList.add('hacked');
+                            }, Math.random() * 500 + 400);
+                        });
+                    });
+
+                    // Spread inside GCP too
+                    agentsData['gcp'].forEach(n => {
+                        if(n.id !== attackerId) {
+                            setTimeout(() => {
+                                if(!isSimulating) return;
+                                document.getElementById(n.id)?.classList.add('hacked');
+                            }, Math.random() * 500 + 200);
+                        }
+                    });
+
+                    setTimeout(() => {
+                        if(!isSimulating) return;
+                        if(out) out.innerHTML += `<br><span class="text-red-500 font-bold">> FATAL: 100% Blast Radius. Flat VPN architecture compromised entire infrastructure.</span>`;
+                        setTimeout(() => { isSimulating = false; }, 2000);
+                    }, 1500);
+
+                }, 800);
+            }, 800);
+        }
+
+        function runLegacyShadow() {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            const out = document.getElementById('terminal-out');
+            
+            ['aws', 'gcp', 'onp', 'lap'].forEach(e => drawLine(`gw-${e}`, 'node-vpn-hub', 'vpn-pipe'));
+
+            // Drop a rogue agent
+            const rogueContainer = document.getElementById('env-lap');
+            if(!document.getElementById('rogue-agent-legacy')) {
+                rogueContainer.innerHTML += `<div id="rogue-agent-legacy" class="agent-node absolute right-2 w-10 h-10 bg-slate-900 border-2 border-red-500 rounded-full flex flex-col items-center justify-center text-xl shadow-[0_0_15px_#ef4444] z-30 opacity-0 scale-50 transition-all">🥷</div>`;
+            }
+            const rogue = document.getElementById('rogue-agent-legacy');
+            
+            setTimeout(() => {
+                if(!isSimulating) return;
+                rogue.style.opacity = '1';
+                rogue.style.transform = 'scale(1)';
+                
+                if(out) out.innerHTML = `> <span class="text-orange-400">WARNING: Unknown "Shadow AI" Agent spun up on Laptop network.</span><br>> Connecting to VPN...`;
+                
+                setTimeout(() => {
+                    if(!isSimulating) return;
+                    drawLine('rogue-agent-legacy', 'gw-lap', 'stream-legacy-active');
+                    setTimeout(() => {
+                        if(!isSimulating) return;
+                        drawLine('gw-lap', 'node-vpn-hub', 'stream-legacy-active');
+                        
+                        setTimeout(() => {
+                            if(!isSimulating) return;
+                            drawLine('node-vpn-hub', 'gw-onp', 'stream-legacy-active');
+                            setTimeout(() => {
+                                if(!isSimulating) return;
+                                drawLine('gw-onp', 'onp-1', 'stream-danger');
+                                drawLine('gw-onp', 'onp-2', 'stream-danger');
+                                drawLine('gw-onp', 'onp-3', 'stream-danger');
+                                
+                                if(out) out.innerHTML += `<br><span class="text-red-500 font-bold">> BREACH: Shadow agent has unchecked network access to On-Premise databases via VPN hub.</span>`;
+                                setTimeout(() => { isSimulating = false; }, 2000);
+                            }, 800);
+                        }, 800);
+                    }, 800);
+                }, 1000);
+            }, 100);
+        }
+
+        // --- CYNAPSA SIMULATIONS ---
+
+        function applyDimmingExcept(meshColor) {
+            document.querySelectorAll('.agent-node').forEach(el => {
+                if (el.id.includes('rogue')) return; 
+
+                if (el.dataset.mesh === meshColor) {
+                    el.classList.remove('dimmed');
+                    el.classList.add(`highlight-${meshColor}`);
+                } else {
+                    el.classList.remove('highlight-green', 'highlight-blue');
+                    el.classList.add('dimmed');
+                }
+            });
+        }
+
+        function runCynapsaFlow() {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            const out = document.getElementById('terminal-out');
+            
+            if(out) out.innerHTML = `> Isolating <span class="text-green-400 font-bold">Finance Mesh (Green)</span>...`;
+            
+            applyDimmingExcept('green');
+            
+            setTimeout(() => {
+                if(!isSimulating) return;
+                // Draw P2P for Green
+                const greens = document.querySelectorAll('.highlight-green');
+                for(let i=0; i<greens.length; i++) {
+                    for(let j=i+1; j<greens.length; j++) {
+                        drawLine(greens[i].id, greens[j].id, 'stream-p2p-green');
+                    }
+                }
+                
+                if(out) out.innerHTML += `<br>> Finance agents authenticated & linked P2P.`;
+
+                // Switch to Blue
+                setTimeout(() => {
+                    if(!isSimulating) return;
+                    networkLines.innerHTML = '';
+                    if(out) out.innerHTML += `<br>> Isolating <span class="text-blue-400 font-bold">R&D Mesh (Blue)</span>...`;
+                    
+                    applyDimmingExcept('blue');
+
+                    setTimeout(() => {
+                        if(!isSimulating) return;
+                        const blues = document.querySelectorAll('.highlight-blue');
+                        for(let i=0; i<blues.length; i++) {
+                            for(let j=i+1; j<blues.length; j++) {
+                                drawLine(blues[i].id, blues[j].id, 'stream-p2p-blue');
+                            }
+                        }
+                        if(out) out.innerHTML += `<br>> R&D agents linked. Complete logical separation achieved regardless of physical location.`;
+                        
+                        setTimeout(() => { isSimulating = false; }, 2000);
+                    }, 800);
+                }, 3000);
+            }, 800);
+        }
+
+        function runCynapsaAttack() {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            const out = document.getElementById('terminal-out');
+            const checklist = document.getElementById('ccp-checklist');
+            const attackerId = 'lap-2'; // Blue mesh
+
+            document.querySelectorAll('.agent-node').forEach(el => {
+                el.classList.remove('dimmed', 'highlight-green', 'highlight-blue');
+            });
+
+            if(out) out.innerHTML = `> <span class="text-red-500 font-bold">ALERT:</span> [lap-2] (R&D) compromised.<br>> Malware attempting to route to neighbors...`;
+            const attacker = document.getElementById(attackerId);
+            if(attacker) attacker.classList.add('hacked');
+            
+            drawLine(attackerId, 'node-ccp', 'stream-auth', 'auth-line');
+
+            setTimeout(() => {
+                if(!isSimulating) return;
+                if(checklist) checklist.style.opacity = '1';
+                
+                setTimeout(() => {
+                    if(!isSimulating) return;
+                    if(out) out.innerHTML += `<br>> CCP evaluating routing request...`;
+                    const ccp = document.getElementById('node-ccp');
+                    if(ccp) ccp.firstElementChild.style.animation = 'pulse-warning 1s infinite';
+
+                    setTimeout(() => {
+                        if(!isSimulating) return;
+                        const chk1 = document.getElementById('chk-1');
+                        if(chk1) {
+                            chk1.className = 'check-item mb-1 failed'; 
+                            chk1.innerText = '1. Cryptographic Identity (REVOKED)';
+                        }
+                        
+                        if(out) out.innerHTML += `<br>> <span class="text-red-400">CCP REJECTED: Compromise detected. Trust score 0.</span>`;
+
+                        setTimeout(() => {
+                            if(!isSimulating) return;
+                            if(checklist) checklist.style.opacity = '0';
+                            if(ccp) ccp.firstElementChild.style.animation = 'none';
+                            document.getElementById('auth-line')?.remove();
+                            
+                            if(out) out.innerHTML += `<br>> Malware attempts direct IP routing to neighbors...`;
+                            const targets = ['aws-3', 'gcp-3', 'onp-2'];
+                            targets.forEach((t, i) => drawLine(attackerId, t, 'stream-danger', `danger-${i}`));
+
+                            setTimeout(() => {
+                                if(!isSimulating) return;
+                                targets.forEach((t, i) => document.getElementById(`danger-${i}`)?.remove());
+                                if(out) out.innerHTML += `<br><span class="text-green-400 font-bold">> BLOCKED: Without CCP routing and tokens, neighbors drop all traffic. Blast radius is ZERO. No other agent impacted.</span>`;
+                                
+                                setTimeout(() => { isSimulating = false; }, 2000);
+                            }, 1500);
+                        }, 1500);
+                    }, 1000);
+                }, 500);
+            }, 500);
+        }
+
+        function runCynapsaShadow() {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            const out = document.getElementById('terminal-out');
+            const checklist = document.getElementById('ccp-checklist');
+            
+            document.querySelectorAll('.agent-node').forEach(el => {
+                el.classList.remove('dimmed', 'highlight-green', 'highlight-blue');
+            });
+
+            const rogueContainer = document.getElementById('env-lap');
+            if(!document.getElementById('rogue-agent-cyn')) {
+                rogueContainer.innerHTML += `<div id="rogue-agent-cyn" class="agent-node absolute right-2 w-10 h-10 bg-slate-900 border-2 border-red-500 rounded-full flex flex-col items-center justify-center text-xl shadow-[0_0_15px_#ef4444] z-30 opacity-0 scale-50 transition-all">🥷</div>`;
+            }
+            const rogue = document.getElementById('rogue-agent-cyn');
+            
+            setTimeout(() => {
+                if(!isSimulating) return;
+                if(rogue) {
+                    rogue.style.opacity = '1';
+                    rogue.style.transform = 'scale(1)';
+                }
+                
+                if(out) out.innerHTML = `> <span class="text-orange-400">WARNING: Unknown "Shadow AI" deployed locally.</span><br>> Lacks Cynapsa protocol. Sending raw IP requests...`;
+                
+                setTimeout(() => {
+                    if(!isSimulating) return;
+                    drawLine('rogue-agent-cyn', 'aws-1', 'stream-danger', 'rogue-direct1');
+                    drawLine('rogue-agent-cyn', 'onp-1', 'stream-danger', 'rogue-direct2');
+                    
+                    setTimeout(() => {
+                        if(!isSimulating) return;
+                        document.getElementById('rogue-direct1')?.remove();
+                        document.getElementById('rogue-direct2')?.remove();
+                        if(out) out.innerHTML += `<br>> <span class="text-green-400">BLOCKED:</span> Agents drop non-Mesh packets.`;
+                        
+                        setTimeout(() => {
+                            if(!isSimulating) return;
+                            if(out) out.innerHTML += `<br>> Rogue Agent attempts to spoof CCP out-of-band auth...`;
+                            drawLine('rogue-agent-cyn', 'node-ccp', 'stream-auth', 'rogue-auth');
+                            const ccp = document.getElementById('node-ccp');
+                            if(ccp) ccp.firstElementChild.style.animation = 'pulse-error 0.5s infinite';
+                            
+                            setTimeout(() => {
+                                if(!isSimulating) return;
+                                if(checklist) checklist.style.opacity = '1';
+                                
+                                setTimeout(() => {
+                                    if(!isSimulating) return;
+                                    const chk1 = document.getElementById('chk-1');
+                                    if(chk1) {
+                                        chk1.className = 'check-item mb-1 failed';
+                                        chk1.innerText = '1. Cryptographic Identity (NOT FOUND)';
+                                    }
+                                    if(out) out.innerHTML += `<br><span class="text-red-400">> CCP REJECTS: No valid identity. Routing denied.</span>`;
+                                    
+                                    setTimeout(() => {
+                                        if(!isSimulating) return;
+                                        if(ccp) ccp.firstElementChild.style.animation = 'none';
+                                        if(checklist) checklist.style.opacity = '0';
+                                        document.getElementById('rogue-auth')?.remove();
+                                        
+                                        if(out) out.innerHTML += `<br><span class="text-green-400 font-bold">> ISOLATED: Rogue agent cannot communicate with ANY node on ANY mesh.</span>`;
+                                        setTimeout(() => { isSimulating = false; }, 2000);
+                                    }, 2000);
+                                }, 1000);
+                            }, 500);
+                        }, 1500);
+                    }, 1500);
+                }, 1000);
+            }, 100);
+        }
+
+        // --- Helpers ---
+        function drawLine(id1, id2, cssClass, domId = null) {
+            const el1 = document.getElementById(id1);
+            const el2 = document.getElementById(id2);
+            if (!el1 || !el2) return null;
+
+            const rect1 = el1.getBoundingClientRect();
+            const rect2 = el2.getBoundingClientRect();
+            const containerRect = document.getElementById('canvas-container').getBoundingClientRect();
+
+            const x1 = rect1.left + rect1.width/2 - containerRect.left;
+            const y1 = rect1.top + rect1.height/2 - containerRect.top;
+            const x2 = rect2.left + rect2.width/2 - containerRect.left;
+            const y2 = rect2.top + rect2.height/2 - containerRect.top;
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('class', cssClass);
+            if(domId) line.setAttribute('id', domId);
+
+            networkLines.appendChild(line);
+            return line;
+        }
+
+        function resetSim() {
+            isSimulating = false;
+            
+            // Clean up rogue agents
+            document.getElementById('rogue-agent-legacy')?.remove();
+            document.getElementById('rogue-agent-cyn')?.remove();
+
+            if(currentMode === 'legacy') {
+                const hub = document.getElementById('node-vpn-hub');
+                if(hub) {
+                    hub.style.animation = 'none';
+                }
+            }
+            const ccp = document.getElementById('node-ccp');
+            if(ccp) ccp.firstElementChild.style.animation = 'none';
+            
+            // Clear checklists
+            ['chk-1', 'chk-2', 'chk-3'].forEach(id => {
+                const chk = document.getElementById(id);
+                if(chk) chk.className = 'check-item mb-1';
+            });
+            const chk1 = document.getElementById('chk-1');
+            if(chk1) {
+                chk1.className = 'check-item mb-1';
+                chk1.innerText = '1. Cryptographic Identity';
+            }
+            
+            // Reset agent visuals (remove hacks, dims, highlights)
+            document.querySelectorAll('.agent-node').forEach(el => {
+                el.classList.remove('hacked', 'dimmed', 'highlight-green', 'highlight-blue');
+            });
+
+            // Re-render the mode UI to clear console and state cleanly
+            setMode(currentMode);
+        }
+
+        // Expose globally
+        window.setMode = setMode;
+        window.runLegacyFlow = runLegacyFlow;
+        window.runLegacyBreach = runLegacyBreach;
+        window.runLegacyShadow = runLegacyShadow;
+        window.runCynapsaFlow = runCynapsaFlow;
+        window.runCynapsaAttack = runCynapsaAttack;
+        window.runCynapsaShadow = runCynapsaShadow;
+        window.resetSim = resetSim;
+
+        // Init
+        window.onload = () => {
+            setTimeout(() => setMode('legacy'), 100);
+        };
+        window.addEventListener('resize', () => {
+            if(!isSimulating) setMode(currentMode);
+        });
+    </script>
+</body>
+</html>
