@@ -15,7 +15,7 @@ INDEX_PATH = ROOT / "index.html"
 METADATA_PATH = ROOT / "scripts" / "demo_metadata.json"
 
 DEMO_ORDER = [
-    "POC_to_Cynapsa.html",
+    "POC_to_RaveTech.html",
     "4_issues.html",
     "healthcare_agents.html",
     "legal_doc_agent.html",
@@ -25,40 +25,40 @@ DEMO_ORDER = [
 ]
 
 DEMO_OVERRIDES = {
-    "POC_to_Cynapsa.html": {
+    "POC_to_RaveTech.html": {
         "eyebrow": "Start here",
         "title": "The Evolution of Agentic Networking",
-        "description": "Shows the shift from a simple single-environment proof of concept to production reality, where load balancers, API gateways, VPNs, and firewalls create bottlenecks. The final stage introduces the Cynapsa mesh as an identity-native alternative with native agent load balancing.",
+        "description": "Shows the shift from a simple single-environment proof of concept to production reality, where load balancers, API gateways, VPNs, and firewalls create bottlenecks. The final stage introduces the Rave Tech mesh as an identity-native alternative with native agent load balancing.",
     },
     "4_issues.html": {
         "eyebrow": "Framework barriers",
         "title": "The 4 Barriers to Agentic AI",
-        "description": "Walks through security, privacy, accessibility, and scalability problems that appear when lab-built agent frameworks move into enterprise production. Each stage lets the viewer compare legacy infrastructure behavior with a Cynapsa mesh approach.",
+        "description": "Walks through security, privacy, accessibility, and scalability problems that appear when lab-built agent frameworks move into enterprise production. Each stage lets the viewer compare legacy infrastructure behavior with a Rave Tech mesh approach.",
     },
     "healthcare_agents.html": {
         "eyebrow": "Healthcare use case",
         "title": "Healthcare AI and HIPAA Compliance",
-        "description": "Demonstrates a hospital sepsis-detection workflow. The legacy path sends protected health information toward the cloud, while the Cynapsa path keeps the health agent and raw EHR data inside the hospital network.",
+        "description": "Demonstrates a hospital sepsis-detection workflow. The legacy path sends protected health information toward the cloud, while the Rave Tech path keeps the health agent and raw EHR data inside the hospital network.",
     },
     "legal_doc_agent.html": {
         "eyebrow": "Legal use case",
         "title": "Legal Data Confidentiality",
-        "description": "Explains how a law firm can use an AI document agent without uploading confidential client files to the cloud. The Cynapsa version places the document agent next to the private VectorDB and returns only the final answer.",
+        "description": "Explains how a law firm can use an AI document agent without uploading confidential client files to the cloud. The Rave Tech version places the document agent next to the private VectorDB and returns only the final answer.",
     },
     "identity_based_routing.html": {
         "eyebrow": "Routing concept",
         "title": "Identity-Based Routing",
-        "description": "Compares IP-based networking with Cynapsa routing by cryptographic identity. It highlights mobile agent roaming, IP changes, out-of-band authorization through the control plane, and zero-trust connectivity that survives network changes.",
+        "description": "Compares IP-based networking with Rave Tech routing by cryptographic identity. It highlights mobile agent roaming, IP changes, out-of-band authorization through the control plane, and zero-trust connectivity that survives network changes.",
     },
     "distributed_agentic_segmentation.html": {
         "eyebrow": "Distributed segmentation",
         "title": "Proximity Does Not Equal Trust",
-        "description": "Shows agentic microsegmentation across AWS, GCP, on-premise, and local networks. The legacy hub-and-spoke VPN connects locations with any-to-any access, while Cynapsa uses identity-based P2P routing and mesh contexts to contain breaches and block shadow agents.",
+        "description": "Shows agentic microsegmentation across AWS, GCP, on-premise, and local networks. The legacy hub-and-spoke VPN connects locations with any-to-any access, while Rave Tech uses identity-based P2P routing and mesh contexts to contain breaches and block shadow agents.",
     },
     "microsegmentation.html": {
         "eyebrow": "Security simulation",
         "title": "Kubernetes Blast Radius Simulation",
-        "description": "Simulates a compromised AI agent inside a shared Kubernetes namespace. The current network topology allows lateral movement, while Cynapsa agentic microsegmentation contains the compromise through identity-based cryptographic isolation.",
+        "description": "Simulates a compromised AI agent inside a shared Kubernetes namespace. The current network topology allows lateral movement, while Rave Tech agentic microsegmentation contains the compromise through identity-based cryptographic isolation.",
     },
 }
 
@@ -133,12 +133,12 @@ def infer_demo(path):
     parser.feed(path.read_text(encoding="utf-8"))
 
     title = parser.heading or parser.title or title_from_filename(path)
-    title = re.sub(r"\s*\|\s*Cynapsa$", "", title)
-    title = re.sub(r"^Cynapsa:\s*", "", title)
-    title = re.sub(r"^Cynapsa Use Case:\s*", "", title)
+    title = re.sub(r"\s*\|\s*RaveTech$", "", title)
+    title = re.sub(r"^Rave Tech:\s*", "", title)
+    title = re.sub(r"^Rave Tech Use Case:\s*", "", title)
 
     description = parser.paragraph or (
-        "Interactive Cynapsa demo page. Open it to explore the scenario and compare the legacy networking behavior with the Cynapsa approach."
+        "Interactive Rave Tech demo page. Open it to explore the scenario and compare the legacy networking behavior with the Rave Tech approach."
     )
 
     return {
@@ -200,7 +200,7 @@ def describe_with_ai(path):
     model = os.environ.get("OPENAI_MODEL", "gpt-5.4-mini")
     fallback = infer_demo(path)
     prompt = f"""
-Create copy for a Cynapsa public web demo index card.
+Create copy for a Rave Tech public web demo index card.
 
 Return JSON only with this exact shape:
 {{
@@ -211,7 +211,7 @@ Return JSON only with this exact shape:
 
 Requirements:
 - Describe what the demo shows, not implementation details.
-- Mention the legacy networking failure mode and the Cynapsa idea when clear.
+- Mention the legacy networking failure mode and the Rave Tech idea when clear.
 - Keep the tone concise, polished, and enterprise-friendly.
 - Do not invent details not present in the page text.
 
@@ -350,7 +350,7 @@ def render_index(demos):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cynapsa Public Web Demos</title>
+    <title>Rave Tech Public Web Demos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {{
@@ -379,19 +379,19 @@ def render_index(demos):
     <main class="relative mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
         <header class="mb-10 grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
             <div>
-                <p class="mb-4 text-xs font-bold uppercase tracking-[0.28em] text-cyan-300">Cynapsa public web</p>
+                <p class="mb-4 text-xs font-bold uppercase tracking-[0.28em] text-cyan-300">Rave Tech public web</p>
                 <h1 class="max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
                     Interactive demos for agentic networking.
                 </h1>
                 <p class="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-                    This repo contains standalone HTML demos that explain why enterprise agentic AI needs secure, identity-aware networking. Each page compares legacy network patterns against Cynapsa concepts such as portless mesh connectivity, local agents, identity-based routing, and microsegmentation.
+                    This repo contains standalone HTML demos that explain why enterprise agentic AI needs secure, identity-aware networking. Each page compares legacy network patterns against Rave Tech concepts such as portless mesh connectivity, local agents, identity-based routing, and microsegmentation.
                 </p>
             </div>
 
             <section class="rounded-lg border border-slate-700 bg-slate-900/70 p-5 shadow-2xl shadow-cyan-950/20 backdrop-blur">
                 <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">How to use this index</h2>
                 <p class="mt-3 text-sm leading-6 text-slate-300">
-                    Open a demo, use its sidebar controls, and compare the failure mode with the Cynapsa approach. The pages are static, so they can run directly in a browser without a build step.
+                    Open a demo, use its sidebar controls, and compare the failure mode with the Rave Tech approach. The pages are static, so they can run directly in a browser without a build step.
                 </p>
                 <div class="mt-5 grid grid-cols-3 gap-3 text-center text-xs text-slate-400">
                     <div class="rounded border border-slate-700 bg-slate-950/70 p-3">

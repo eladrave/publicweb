@@ -3,7 +3,7 @@ name: pages-build-deployment
 on:
   workflow_run:
     workflows:
-      - Brand rewrite
+      - Update demo index
     types:
       - completed
     branches:

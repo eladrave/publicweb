@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cynapsa: Agentic Microsegmentation</title>
+    <title>Rave Tech: Agentic Microsegmentation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Core Animations */
@@ -88,7 +88,7 @@
             <div class="mb-6 border-b border-slate-800 pb-6">
                 <div class="text-cyan-400 font-bold tracking-widest text-[10px] mb-2 uppercase">Agentic Microsegmentation</div>
                 <h1 class="text-3xl font-bold text-white mb-2 leading-tight">Proximity Does Not <br><span class="text-slate-400">Equal Trust</span></h1>
-                <p class="text-sm text-slate-400 mt-3">Legacy networking relies on hub-and-spoke VPNs, bridging entire locations. Cynapsa replaces location-based trust with strict, identity-based P2P routing restricted to specific Mesh contexts.</p>
+                <p class="text-sm text-slate-400 mt-3">Legacy networking relies on hub-and-spoke VPNs, bridging entire locations. Rave Tech replaces location-based trust with strict, identity-based P2P routing restricted to specific Mesh contexts.</p>
             </div>
 
             <!-- Architecture Toggle -->
@@ -98,15 +98,15 @@
                 <button onclick="setMode('legacy')" id="btn-legacy" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.1)] relative group">
                     <div id="dot-legacy" class="w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]">1</div>
                     <div>
-                        <h3 class="text-white font-semibold text-md">Before Cynapsa (Hub & Spoke)</h3>
+                        <h3 class="text-white font-semibold text-md">Before Rave Tech (Hub & Spoke)</h3>
                         <p class="text-xs text-slate-400 mt-1">Locations connect to VPN. Any-to-Any access creates massive blast radiuses.</p>
                     </div>
                 </button>
 
-                <button onclick="setMode('cynapsa')" id="btn-cynapsa" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-transparent hover:bg-slate-800/50 relative group">
-                    <div id="dot-cynapsa" class="w-8 h-8 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
+                <button onclick="setMode('ravetech')" id="btn-ravetech" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-transparent hover:bg-slate-800/50 relative group">
+                    <div id="dot-ravetech" class="w-8 h-8 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
                     <div>
-                        <h3 class="text-slate-300 group-hover:text-white font-semibold text-md">With Cynapsa (Identity Mesh)</h3>
+                        <h3 class="text-slate-300 group-hover:text-white font-semibold text-md">With Rave Tech (Identity Mesh)</h3>
                         <p class="text-xs text-slate-500 group-hover:text-slate-400 mt-1">Out-of-band auth. P2P routing strictly limited by designated Mesh contexts.</p>
                     </div>
                 </button>
@@ -164,7 +164,7 @@
                 <span class="text-[10px] font-bold text-orange-400 mt-1 text-center">VPN HUB<br>(Any-to-Any)</span>
             </div>
 
-            <!-- CCP Hub (Used only in Cynapsa) -->
+            <!-- CCP Hub (Used only in Rave Tech) -->
             <div id="node-ccp" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-40 transition-all duration-500 opacity-0 scale-50 pointer-events-none">
                 <div class="w-24 h-24 bg-slate-800 border-2 border-purple-500 rounded-full flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(168,85,247,0.4)] relative">
                     🧠
@@ -176,7 +176,7 @@
                         <div id="chk-3" class="check-item">3. Role-Based Topology</div>
                     </div>
                 </div>
-                <span class="text-[10px] font-bold text-purple-300 mt-2 text-center bg-slate-900/80 px-2 py-1 rounded">Cynapsa Control Plane</span>
+                <span class="text-[10px] font-bold text-purple-300 mt-2 text-center bg-slate-900/80 px-2 py-1 rounded">Rave Tech Control Plane</span>
             </div>
             
             <!-- Mesh Legend -->
@@ -235,18 +235,18 @@
                     <button onclick="runLegacyShadow()" class="flex-1 min-w-[30%] py-2 bg-orange-900 hover:bg-orange-800 text-white rounded text-[10px] sm:text-xs transition-colors border border-orange-500 font-bold shadow-[0_0_10px_rgba(245,158,11,0.3)]">3. Shadow Agent</button>
                 </div>
             `,
-            cynapsa: `
+            ravetech: `
                 <div class="flex-grow">
                     <h4 class="text-cyan-400 font-bold mb-2 uppercase text-[11px] tracking-widest">Agentic Microsegmentation</h4>
                     <p class="text-sm text-slate-300 mb-2">The central hub is gone. Agents belong to Identity Meshes completely independent of their physical location. Out-of-band authorization blocks cross-mesh traffic entirely.</p>
                     <div id="terminal-out" class="p-2 bg-slate-900 rounded border border-slate-700 text-xs font-mono text-slate-400 min-h-[5rem] overflow-y-auto">
-                        > Cynapsa Control Plane Active.<br>> Identity boundaries enforced.<br>> Awaiting workflow...
+                        > Rave Tech Control Plane Active.<br>> Identity boundaries enforced.<br>> Awaiting workflow...
                     </div>
                 </div>
                 <div class="flex gap-2 mt-4 flex-wrap">
-                    <button onclick="runCynapsaFlow()" class="flex-1 min-w-[30%] py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] sm:text-xs transition-colors border border-slate-600">1. Mesh Auth</button>
-                    <button onclick="runCynapsaAttack()" class="flex-1 min-w-[30%] py-2 bg-red-900 hover:bg-red-800 text-white rounded text-[10px] sm:text-xs transition-colors border border-red-500 font-bold shadow-[0_0_10px_rgba(239,68,68,0.3)]">2. Hacked Agent</button>
-                    <button onclick="runCynapsaShadow()" class="flex-1 min-w-[30%] py-2 bg-orange-900 hover:bg-orange-800 text-white rounded text-[10px] sm:text-xs transition-colors border border-orange-500 font-bold shadow-[0_0_10px_rgba(245,158,11,0.3)]">3. Shadow Agent</button>
+                    <button onclick="runRaveTechFlow()" class="flex-1 min-w-[30%] py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] sm:text-xs transition-colors border border-slate-600">1. Mesh Auth</button>
+                    <button onclick="runRaveTechAttack()" class="flex-1 min-w-[30%] py-2 bg-red-900 hover:bg-red-800 text-white rounded text-[10px] sm:text-xs transition-colors border border-red-500 font-bold shadow-[0_0_10px_rgba(239,68,68,0.3)]">2. Hacked Agent</button>
+                    <button onclick="runRaveTechShadow()" class="flex-1 min-w-[30%] py-2 bg-orange-900 hover:bg-orange-800 text-white rounded text-[10px] sm:text-xs transition-colors border border-orange-500 font-bold shadow-[0_0_10px_rgba(245,158,11,0.3)]">3. Shadow Agent</button>
                 </div>
             `
         };
@@ -280,9 +280,9 @@
             
             // Toggle sidebar buttons
             const btnLegacy = document.getElementById('btn-legacy');
-            const btnCynapsa = document.getElementById('btn-cynapsa');
+            const btnRaveTech = document.getElementById('btn-ravetech');
             const dotLegacy = document.getElementById('dot-legacy');
-            const dotCynapsa = document.getElementById('dot-cynapsa');
+            const dotRaveTech = document.getElementById('dot-ravetech');
 
             if (mode === 'legacy') {
                 btnLegacy?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
@@ -290,10 +290,10 @@
                 dotLegacy?.classList.replace('text-slate-500', 'text-slate-900');
                 btnLegacy?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
 
-                btnCynapsa?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
-                dotCynapsa?.classList.replace('bg-cyan-500', 'bg-slate-800');
-                dotCynapsa?.classList.replace('text-slate-900', 'text-slate-500');
-                btnCynapsa?.querySelector('h3')?.classList.replace('text-white', 'text-slate-300');
+                btnRaveTech?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotRaveTech?.classList.replace('bg-cyan-500', 'bg-slate-800');
+                dotRaveTech?.classList.replace('text-slate-900', 'text-slate-500');
+                btnRaveTech?.querySelector('h3')?.classList.replace('text-white', 'text-slate-300');
 
                 // Visuals
                 document.getElementById('node-vpn-hub').style.opacity = '1';
@@ -308,10 +308,10 @@
                 });
 
             } else {
-                btnCynapsa?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
-                dotCynapsa?.classList.replace('bg-slate-800', 'bg-cyan-500');
-                dotCynapsa?.classList.replace('text-slate-500', 'text-slate-900');
-                btnCynapsa?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
+                btnRaveTech?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotRaveTech?.classList.replace('bg-slate-800', 'bg-cyan-500');
+                dotRaveTech?.classList.replace('text-slate-500', 'text-slate-900');
+                btnRaveTech?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
 
                 btnLegacy?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
                 dotLegacy?.classList.replace('bg-cyan-500', 'bg-slate-800');
@@ -477,7 +477,7 @@
             }, 100);
         }
 
-        // --- CYNAPSA SIMULATIONS ---
+        // --- RAVE TECH SIMULATIONS ---
 
         function applyDimmingExcept(meshColor) {
             document.querySelectorAll('.agent-node').forEach(el => {
@@ -493,7 +493,7 @@
             });
         }
 
-        function runCynapsaFlow() {
+        function runRaveTechFlow() {
             if (isSimulating) return;
             isSimulating = true;
             networkLines.innerHTML = '';
@@ -539,7 +539,7 @@
             }, 800);
         }
 
-        function runCynapsaAttack() {
+        function runRaveTechAttack() {
             if (isSimulating) return;
             isSimulating = true;
             networkLines.innerHTML = '';
@@ -600,7 +600,7 @@
             }, 500);
         }
 
-        function runCynapsaShadow() {
+        function runRaveTechShadow() {
             if (isSimulating) return;
             isSimulating = true;
             networkLines.innerHTML = '';
@@ -612,10 +612,10 @@
             });
 
             const rogueContainer = document.getElementById('env-lap');
-            if(!document.getElementById('rogue-agent-cyn')) {
-                rogueContainer.innerHTML += `<div id="rogue-agent-cyn" class="agent-node absolute right-2 w-10 h-10 bg-slate-900 border-2 border-red-500 rounded-full flex flex-col items-center justify-center text-xl shadow-[0_0_15px_#ef4444] z-30 opacity-0 scale-50 transition-all">🥷</div>`;
+            if(!document.getElementById('rogue-agent-rt')) {
+                rogueContainer.innerHTML += `<div id="rogue-agent-rt" class="agent-node absolute right-2 w-10 h-10 bg-slate-900 border-2 border-red-500 rounded-full flex flex-col items-center justify-center text-xl shadow-[0_0_15px_#ef4444] z-30 opacity-0 scale-50 transition-all">🥷</div>`;
             }
-            const rogue = document.getElementById('rogue-agent-cyn');
+            const rogue = document.getElementById('rogue-agent-rt');
             
             setTimeout(() => {
                 if(!isSimulating) return;
@@ -624,12 +624,12 @@
                     rogue.style.transform = 'scale(1)';
                 }
                 
-                if(out) out.innerHTML = `> <span class="text-orange-400">WARNING: Unknown "Shadow AI" deployed locally.</span><br>> Lacks Cynapsa protocol. Sending raw IP requests...`;
+                if(out) out.innerHTML = `> <span class="text-orange-400">WARNING: Unknown "Shadow AI" deployed locally.</span><br>> Lacks Rave Tech protocol. Sending raw IP requests...`;
                 
                 setTimeout(() => {
                     if(!isSimulating) return;
-                    drawLine('rogue-agent-cyn', 'aws-1', 'stream-danger', 'rogue-direct1');
-                    drawLine('rogue-agent-cyn', 'onp-1', 'stream-danger', 'rogue-direct2');
+                    drawLine('rogue-agent-rt', 'aws-1', 'stream-danger', 'rogue-direct1');
+                    drawLine('rogue-agent-rt', 'onp-1', 'stream-danger', 'rogue-direct2');
                     
                     setTimeout(() => {
                         if(!isSimulating) return;
@@ -640,7 +640,7 @@
                         setTimeout(() => {
                             if(!isSimulating) return;
                             if(out) out.innerHTML += `<br>> Rogue Agent attempts to spoof CCP out-of-band auth...`;
-                            drawLine('rogue-agent-cyn', 'node-ccp', 'stream-auth', 'rogue-auth');
+                            drawLine('rogue-agent-rt', 'node-ccp', 'stream-auth', 'rogue-auth');
                             const ccp = document.getElementById('node-ccp');
                             if(ccp) ccp.firstElementChild.style.animation = 'pulse-error 0.5s infinite';
                             
@@ -706,7 +706,7 @@
             
             // Clean up rogue agents
             document.getElementById('rogue-agent-legacy')?.remove();
-            document.getElementById('rogue-agent-cyn')?.remove();
+            document.getElementById('rogue-agent-rt')?.remove();
 
             if(currentMode === 'legacy') {
                 const hub = document.getElementById('node-vpn-hub');
@@ -742,9 +742,9 @@
         window.runLegacyFlow = runLegacyFlow;
         window.runLegacyBreach = runLegacyBreach;
         window.runLegacyShadow = runLegacyShadow;
-        window.runCynapsaFlow = runCynapsaFlow;
-        window.runCynapsaAttack = runCynapsaAttack;
-        window.runCynapsaShadow = runCynapsaShadow;
+        window.runRaveTechFlow = runRaveTechFlow;
+        window.runRaveTechAttack = runRaveTechAttack;
+        window.runRaveTechShadow = runRaveTechShadow;
         window.resetSim = resetSim;
 
         // Init

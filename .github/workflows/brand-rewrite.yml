@@ -39,4 +39,22 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "Apply brand rewrite"
-          git push
+
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Push failed, rebasing on latest main before retry ${attempt}."
+            git fetch origin main
+            git rebase origin/main
+            python3 .github/scripts/rewrite_brand.py
+
+            if ! git diff --quiet --exit-code; then
+              git add -A
+              git commit --amend --no-edit
+            fi
+          done
+
+          echo "Unable to push brand rewrite after retries."
+          exit 1

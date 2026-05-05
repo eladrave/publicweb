@@ -34,7 +34,7 @@ SKIP_DIRS = {
 
 CASELESS_OLD = re.compile(re.escape(OLD), re.IGNORECASE)
 CASELESS_OLD_SHORT = re.compile(
-    r"(?<![A-Za-z0-9])" + re.escape(OLD_SHORT) + r"(?=$|[-_])",
+    r"(?<![A-Za-z0-9])" + re.escape(OLD_SHORT) + r"(?![A-Za-z0-9])",
     re.IGNORECASE,
 )
 
