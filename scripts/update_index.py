@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 from html import escape
 from html.parser import HTMLParser
+import json
+import os
 from pathlib import Path
 import re
+import sys
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX_PATH = ROOT / "index.html"
+METADATA_PATH = ROOT / "scripts" / "demo_metadata.json"
 
 DEMO_ORDER = [
     "POC_to_Cynapsa.html",
@@ -91,6 +97,27 @@ class DemoTextParser(HTMLParser):
             self.paragraph = text
 
 
+class VisibleTextParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.parts = []
+        self._ignored_depth = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in {"script", "style", "svg"}:
+            self._ignored_depth += 1
+
+    def handle_endtag(self, tag):
+        if tag in {"script", "style", "svg"} and self._ignored_depth:
+            self._ignored_depth -= 1
+
+    def handle_data(self, data):
+        if not self._ignored_depth:
+            text = clean_text(data)
+            if text:
+                self.parts.append(text)
+
+
 def clean_text(value):
     value = re.sub(r"\s+", " ", value)
     return value.strip()
@@ -121,6 +148,140 @@ def infer_demo(path):
     }
 
 
+def compact_page_text(path, max_chars=12000):
+    parser = VisibleTextParser()
+    parser.feed(path.read_text(encoding="utf-8"))
+    text = clean_text(" ".join(parser.parts))
+    return text[:max_chars]
+
+
+def extract_response_text(payload):
+    if payload.get("output_text"):
+        return payload["output_text"]
+
+    chunks = []
+    for item in payload.get("output", []):
+        for content in item.get("content", []):
+            text = content.get("text")
+            if text:
+                chunks.append(text)
+    return "\n".join(chunks)
+
+
+def parse_json_object(text):
+    text = text.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
+
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        match = re.search(r"\{.*\}", text, flags=re.DOTALL)
+        if not match:
+            raise
+        return json.loads(match.group(0))
+
+
+def valid_ai_demo(data):
+    required = {"eyebrow", "title", "description"}
+    return (
+        isinstance(data, dict)
+        and required.issubset(data)
+        and all(isinstance(data[key], str) and data[key].strip() for key in required)
+    )
+
+
+def describe_with_ai(path):
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        return None
+
+    model = os.environ.get("OPENAI_MODEL", "gpt-5.4-mini")
+    fallback = infer_demo(path)
+    prompt = f"""
+Create copy for a Cynapsa public web demo index card.
+
+Return JSON only with this exact shape:
+{{
+  "eyebrow": "2-3 words",
+  "title": "short title",
+  "description": "one sentence, 28-42 words"
+}}
+
+Requirements:
+- Describe what the demo shows, not implementation details.
+- Mention the legacy networking failure mode and the Cynapsa idea when clear.
+- Keep the tone concise, polished, and enterprise-friendly.
+- Do not invent details not present in the page text.
+
+Filename: {path.name}
+Fallback title: {fallback["title"]}
+Fallback intro: {fallback["description"]}
+
+Page text:
+{compact_page_text(path)}
+""".strip()
+
+    request = Request(
+        "https://api.openai.com/v1/responses",
+        data=json.dumps({
+            "model": model,
+            "input": prompt,
+            "max_output_tokens": 250,
+        }).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        with urlopen(request, timeout=45) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+        data = parse_json_object(extract_response_text(payload))
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError) as error:
+        print(f"AI description failed for {path.name}; using deterministic fallback. {error}", file=sys.stderr)
+        return None
+
+    if not valid_ai_demo(data):
+        print(f"AI description for {path.name} was invalid; using deterministic fallback.", file=sys.stderr)
+        return None
+
+    return {
+        "eyebrow": clean_text(data["eyebrow"])[:40],
+        "title": clean_text(data["title"])[:80],
+        "description": clean_text(data["description"])[:320],
+    }
+
+
+def load_metadata():
+    if not METADATA_PATH.exists():
+        return {}
+
+    try:
+        data = json.loads(METADATA_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+
+    if not isinstance(data, dict):
+        return {}
+
+    return {
+        filename: value
+        for filename, value in data.items()
+        if isinstance(filename, str) and valid_ai_demo(value)
+    }
+
+
+def write_metadata(metadata):
+    METADATA_PATH.write_text(
+        json.dumps(metadata, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
 def get_demos():
     html_files = [
         path for path in ROOT.glob("*.html")
@@ -128,12 +289,32 @@ def get_demos():
     ]
     known_names = [name for name in DEMO_ORDER if (ROOT / name).exists()]
     new_names = sorted(path.name for path in html_files if path.name not in DEMO_ORDER)
+    metadata = load_metadata()
+    metadata_changed = False
 
     demos = []
     for name in [*known_names, *new_names]:
         path = ROOT / name
-        data = DEMO_OVERRIDES.get(name, infer_demo(path))
+        if name in DEMO_OVERRIDES:
+            data = DEMO_OVERRIDES[name]
+        elif name in metadata:
+            data = metadata[name]
+        else:
+            data = describe_with_ai(path)
+            if data:
+                metadata[name] = data
+                metadata_changed = True
+            else:
+                data = infer_demo(path)
         demos.append({"filename": name, **data})
+
+    stale_names = [name for name in metadata if not (ROOT / name).exists()]
+    for name in stale_names:
+        del metadata[name]
+        metadata_changed = True
+
+    if metadata_changed:
+        write_metadata(metadata)
 
     return demos
 
