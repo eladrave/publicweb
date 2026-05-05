@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cynapsa: Identity-Based Routing & Zero-Trust</title>
+    <title>Rave Tech: Identity-Based Routing & Zero-Trust</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Animations */
@@ -25,7 +25,7 @@
         /* Line Styles */
         .stream-legacy { stroke-dasharray: 8 8; animation: flow-slow 1s linear infinite; stroke: #f59e0b; stroke-width: 3; }
         .stream-legacy-fail { stroke-dasharray: 8 8; stroke: #ef4444; stroke-width: 3; filter: drop-shadow(0 0 4px #ef4444); }
-        .stream-cynapsa { stroke-dasharray: 6 6; animation: flow-fast 0.4s linear infinite; stroke: #22d3ee; stroke-width: 3; filter: drop-shadow(0 0 5px #22d3ee); }
+        .stream-ravetech { stroke-dasharray: 6 6; animation: flow-fast 0.4s linear infinite; stroke: #22d3ee; stroke-width: 3; filter: drop-shadow(0 0 5px #22d3ee); }
         .stream-auth { stroke-dasharray: 4 4; animation: flow-fast 0.6s linear infinite; stroke: #a855f7; stroke-width: 2; }
         
         .fade-in { animation: fadeIn 0.5s ease-in forwards; }
@@ -43,9 +43,9 @@
     <div class="w-1/3 bg-slate-800 border-r border-slate-700 p-8 flex flex-col justify-between z-20 shadow-2xl overflow-y-auto">
         <div>
             <div class="mb-6">
-                <div class="text-cyan-400 font-bold tracking-widest text-xs mb-2">CYNAPSA SECRET SAUCE</div>
+                <div class="text-cyan-400 font-bold tracking-widest text-xs mb-2">RAVE TECH SECRET SAUCE</div>
                 <h1 class="text-3xl font-bold text-white mb-2 leading-tight">Identity-Based <br><span class="text-slate-400">Routing</span></h1>
-                <p class="text-sm text-slate-400 mt-2">Legacy networks route by IP address, making mobility and security a nightmare. Cynapsa routes by cryptographic identity, ensuring true Zero-Trust and unbreakable connectivity.</p>
+                <p class="text-sm text-slate-400 mt-2">Legacy networks route by IP address, making mobility and security a nightmare. Rave Tech routes by cryptographic identity, ensuring true Zero-Trust and unbreakable connectivity.</p>
             </div>
 
             <!-- Stage Navigation -->
@@ -57,16 +57,16 @@
                 <button onclick="setMode('legacy')" id="btn-legacy" class="w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.15)] relative">
                     <div id="dot-legacy" class="w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]">1</div>
                     <div>
-                        <h3 class="text-white font-semibold text-lg">Before Cynapsa (IP Routing)</h3>
+                        <h3 class="text-white font-semibold text-lg">Before Rave Tech (IP Routing)</h3>
                         <p class="text-sm text-slate-400 mt-1">Agents rely on DNS and IPs. Roaming breaks connections. Auth is left to the application.</p>
                     </div>
                 </button>
 
-                <!-- Cynapsa Mode -->
-                <button onclick="setMode('cynapsa')" id="btn-cynapsa" class="w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative">
-                    <div id="dot-cynapsa" class="w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
+                <!-- Rave Tech Mode -->
+                <button onclick="setMode('ravetech')" id="btn-ravetech" class="w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative">
+                    <div id="dot-ravetech" class="w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
                     <div>
-                        <h3 class="text-white font-semibold text-lg">Cynapsa (Identity Routing)</h3>
+                        <h3 class="text-white font-semibold text-lg">Rave Tech (Identity Routing)</h3>
                         <p class="text-sm text-slate-400 mt-1">Out-of-band auth via CCP. Connections survive IP changes seamlessly.</p>
                     </div>
                 </button>
@@ -129,16 +129,16 @@
                     <span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded mt-1 text-slate-400 font-mono">IP: 203.0.113.4</span>
                 </div>
             `,
-            cynapsa: `
+            ravetech: `
                 <!-- Mobile / Roaming Agent A -->
-                <div id="node-cyn-a" class="absolute top-1/2 left-10 -translate-y-1/2 flex flex-col items-center z-20 transition-all duration-700">
-                    <div id="icon-cyn-a" class="w-16 h-16 bg-slate-800 border-2 border-cyan-500 rounded-xl flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(34,211,238,0.3)]">📱</div>
+                <div id="node-rt-a" class="absolute top-1/2 left-10 -translate-y-1/2 flex flex-col items-center z-20 transition-all duration-700">
+                    <div id="icon-rt-a" class="w-16 h-16 bg-slate-800 border-2 border-cyan-500 rounded-xl flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(34,211,238,0.3)]">📱</div>
                     <span class="text-xs font-bold text-slate-300 mt-2">Agent A (Mobile)</span>
                     <span class="text-[10px] bg-cyan-900/50 px-2 py-0.5 rounded mt-1 text-cyan-300 font-mono border border-cyan-700">ID: 0x8F2A...</span>
-                    <span id="ip-label-cyn-a" class="text-[9px] text-slate-500 mt-1 font-mono transition-colors">IP: 192.168.1.5 (WiFi)</span>
+                    <span id="ip-label-rt-a" class="text-[9px] text-slate-500 mt-1 font-mono transition-colors">IP: 192.168.1.5 (WiFi)</span>
                 </div>
 
-                <!-- Cynapsa Control Plane (CCP) -->
+                <!-- Rave Tech Control Plane (CCP) -->
                 <div id="node-ccp" class="absolute top-10 left-1/2 -translate-x-1/2 flex flex-col items-center z-30">
                     <div class="w-20 h-20 bg-slate-800 border-2 border-purple-500 rounded-full flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(168,85,247,0.3)] relative">
                         🧠
@@ -151,7 +151,7 @@
                             <div id="chk-4" class="check-item">4. User Context Valid</div>
                         </div>
                     </div>
-                    <span class="text-xs font-bold text-purple-300 mt-2">Cynapsa Control Plane</span>
+                    <span class="text-xs font-bold text-purple-300 mt-2">Rave Tech Control Plane</span>
                 </div>
 
                 <!-- NAT / Firewalls (Deny All) -->
@@ -159,8 +159,8 @@
                 <div class="absolute top-1/2 right-[30%] -translate-y-1/2 w-4 h-48 bg-slate-700 border-2 border-slate-500 rounded flex items-center justify-center writing-vertical text-[10px] text-slate-400 opacity-50">NAT</div>
 
                 <!-- Target Agent B -->
-                <div id="node-cyn-b" class="absolute top-1/2 right-10 -translate-y-1/2 flex flex-col items-center z-20">
-                    <div id="icon-cyn-b" class="w-16 h-16 bg-slate-800 border-2 border-cyan-500 rounded-xl flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(34,211,238,0.3)]">🤖</div>
+                <div id="node-rt-b" class="absolute top-1/2 right-10 -translate-y-1/2 flex flex-col items-center z-20">
+                    <div id="icon-rt-b" class="w-16 h-16 bg-slate-800 border-2 border-cyan-500 rounded-xl flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(34,211,238,0.3)]">🤖</div>
                     <span class="text-xs font-bold text-slate-300 mt-2">Agent B (Server)</span>
                     <span class="text-[10px] bg-cyan-900/50 px-2 py-0.5 rounded mt-1 text-cyan-300 font-mono border border-cyan-700">ID: 0x4B9E...</span>
                     <span class="text-[9px] text-slate-500 mt-1 font-mono">IP: 10.0.0.8 (Private)</span>
@@ -175,10 +175,10 @@
                     <p class="text-xs text-slate-400 mt-4 leading-relaxed"><strong class="text-orange-400">The Problem:</strong> When Agent A switches from WiFi to 5G, its IP changes mid-session. The firewall and API gateway lose track of the connection, dropping packets and requiring complete re-authentication. Furthermore, authentication is a heavy burden left to Agent B's application code.</p>
                 </div>
             `,
-            cynapsa: `
+            ravetech: `
                 <div class="space-y-3">
-                    <button onclick="runCynapsaAuth()" id="btn-cyn-1" class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded text-sm transition-colors font-medium shadow-lg">1. Authorize via Control Plane</button>
-                    <button onclick="runCynapsaRoaming()" id="btn-cyn-2" class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-sm transition-colors font-medium shadow-lg opacity-50 cursor-not-allowed" disabled>2. Simulate Mobile Roaming</button>
+                    <button onclick="runRaveTechAuth()" id="btn-rt-1" class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded text-sm transition-colors font-medium shadow-lg">1. Authorize via Control Plane</button>
+                    <button onclick="runRaveTechRoaming()" id="btn-rt-2" class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-sm transition-colors font-medium shadow-lg opacity-50 cursor-not-allowed" disabled>2. Simulate Mobile Roaming</button>
                     <p class="text-xs text-slate-400 mt-4 leading-relaxed"><strong class="text-cyan-400">The Solution:</strong> The CCP authenticates cryptographic identities out-of-band before any data flows. Because the P2P connection routes via Identity, Agent A can seamlessly switch networks (IP changes) without dropping a single packet.</p>
                 </div>
             `
@@ -191,18 +191,18 @@
             
             // Toggle sidebar buttons
             const btnLegacy = document.getElementById('btn-legacy');
-            const btnCynapsa = document.getElementById('btn-cynapsa');
+            const btnRaveTech = document.getElementById('btn-ravetech');
             const dotLegacy = document.getElementById('dot-legacy');
-            const dotCynapsa = document.getElementById('dot-cynapsa');
+            const dotRaveTech = document.getElementById('dot-ravetech');
 
             if (mode === 'legacy') {
                 btnLegacy.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.15)] relative";
                 dotLegacy.className = "w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]";
-                btnCynapsa.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative";
-                dotCynapsa.className = "w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10";
+                btnRaveTech.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative";
+                dotRaveTech.className = "w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10";
             } else {
-                btnCynapsa.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.15)] relative";
-                dotCynapsa.className = "w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]";
+                btnRaveTech.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.15)] relative";
+                dotRaveTech.className = "w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]";
                 btnLegacy.className = "w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative";
                 dotLegacy.className = "w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10";
             }
@@ -254,20 +254,20 @@
             }, 1000);
         }
 
-        // --- Cynapsa Simulation ---
-        function runCynapsaAuth() {
+        // --- Rave Tech Simulation ---
+        function runRaveTechAuth() {
             if (isSimulating) return;
             isSimulating = true;
             clearLines();
 
-            const btn1 = document.getElementById('btn-cyn-1');
-            const btn2 = document.getElementById('btn-cyn-2');
+            const btn1 = document.getElementById('btn-rt-1');
+            const btn2 = document.getElementById('btn-rt-2');
             const checklist = document.getElementById('ccp-checklist');
             
             btn1.innerText = "Authenticating Out-of-Band...";
             
             // 1. Agent A requests route from CCP
-            drawLine('node-cyn-a', 'node-ccp', 'stream-auth', 'auth1');
+            drawLine('node-rt-a', 'node-ccp', 'stream-auth', 'auth1');
             
             setTimeout(() => {
                 checklist.style.opacity = '1';
@@ -287,11 +287,11 @@
                     btn1.innerText = "Auth Complete. P2P Tunnel Active.";
                     btn1.classList.replace('bg-purple-600', 'bg-green-600');
                     
-                    document.getElementById('icon-cyn-a').style.animation = "shield-glow 2s infinite";
-                    document.getElementById('icon-cyn-b').style.animation = "shield-glow 2s infinite";
+                    document.getElementById('icon-rt-a').style.animation = "shield-glow 2s infinite";
+                    document.getElementById('icon-rt-b').style.animation = "shield-glow 2s infinite";
 
                     // Direct P2P Line
-                    drawLine('node-cyn-a', 'node-cyn-b', 'stream-cynapsa', 'p2p-line');
+                    drawLine('node-rt-a', 'node-rt-b', 'stream-ravetech', 'p2p-line');
 
                     isSimulating = false;
                     btn2.disabled = false;
@@ -301,13 +301,13 @@
             }, 600);
         }
 
-        function runCynapsaRoaming() {
+        function runRaveTechRoaming() {
             if (isSimulating) return;
             isSimulating = true;
 
-            const agentA = document.getElementById('node-cyn-a');
-            const ipLabel = document.getElementById('ip-label-cyn-a');
-            const btn2 = document.getElementById('btn-cyn-2');
+            const agentA = document.getElementById('node-rt-a');
+            const ipLabel = document.getElementById('ip-label-rt-a');
+            const btn2 = document.getElementById('btn-rt-2');
             
             btn2.innerText = "Roaming... Tunnel Auto-Adjusting";
 

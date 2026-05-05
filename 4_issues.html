@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The 4 Barriers to Agentic AI | Cynapsa</title>
+    <title>The 4 Barriers to Agentic AI | Rave Tech</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Core Animations */
@@ -34,7 +34,7 @@
         /* Line Classes */
         .stream-legacy { stroke-dasharray: 8 8; animation: flow-slow 1s linear infinite; stroke: #f59e0b; stroke-width: 3; }
         .stream-danger { stroke-dasharray: 12 12; animation: flow-fast 0.6s linear infinite; stroke: #ef4444; stroke-width: 5; filter: drop-shadow(0 0 4px #ef4444); }
-        .stream-cynapsa { stroke-dasharray: 6 6; animation: flow-fast 0.3s linear infinite; stroke: #22d3ee; stroke-width: 3; filter: drop-shadow(0 0 6px #22d3ee); }
+        .stream-ravetech { stroke-dasharray: 6 6; animation: flow-fast 0.3s linear infinite; stroke: #22d3ee; stroke-width: 3; filter: drop-shadow(0 0 6px #22d3ee); }
         .stream-success { stroke-dasharray: 4 4; animation: flow-fast 0.5s linear infinite; stroke: #4ade80; stroke-width: 2; }
         .stream-auth { stroke-dasharray: 4 4; animation: flow-fast 0.6s linear infinite; stroke: #a855f7; stroke-width: 2; }
 
@@ -140,15 +140,15 @@
                     </div>
                     <div class="flex gap-2 mt-4">
                         <button onclick="runSim1('legacy')" class="flex-1 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded text-xs transition-colors border border-orange-400 font-bold">1. Run Legacy (IP/Ports)</button>
-                        <button onclick="runSim1('cynapsa')" class="flex-1 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs transition-colors border border-cyan-400 font-bold shadow-[0_0_10px_rgba(34,211,238,0.3)]">2. Run Cynapsa Mesh</button>
+                        <button onclick="runSim1('ravetech')" class="flex-1 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs transition-colors border border-cyan-400 font-bold shadow-[0_0_10px_rgba(34,211,238,0.3)]">2. Run Rave Tech Mesh</button>
                     </div>
                 `,
                 render: () => `
                     <div class="w-full h-full relative fade-in">
-                        <!-- Cynapsa Control Plane (Hidden in legacy) -->
+                        <!-- Rave Tech Control Plane (Hidden in legacy) -->
                         <div id="node-ccp" class="absolute top-8 left-1/2 -translate-x-1/2 flex flex-col items-center opacity-0 transition-opacity duration-500 z-30">
                             <div class="w-16 h-16 bg-slate-800 border-2 border-purple-500 rounded-full flex items-center justify-center text-2xl shadow-[0_0_15px_rgba(168,85,247,0.4)]">🧠</div>
-                            <div class="text-[10px] font-bold text-purple-400 mt-2 text-center">Cynapsa<br>Control Plane</div>
+                            <div class="text-[10px] font-bold text-purple-400 mt-2 text-center">Rave Tech<br>Control Plane</div>
                         </div>
 
                         <!-- Cloud -->
@@ -197,7 +197,7 @@
                     </div>
                     <div class="flex gap-2 mt-4">
                         <button onclick="runSim2('legacy')" class="flex-1 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded text-xs transition-colors border border-orange-400 font-bold">1. Legacy: VPN Data Pull</button>
-                        <button onclick="runSim2('cynapsa')" class="flex-1 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs transition-colors border border-cyan-400 font-bold shadow-[0_0_10px_rgba(34,211,238,0.3)]">2. Cynapsa: Local Agent</button>
+                        <button onclick="runSim2('ravetech')" class="flex-1 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs transition-colors border border-cyan-400 font-bold shadow-[0_0_10px_rgba(34,211,238,0.3)]">2. Rave Tech: Local Agent</button>
                     </div>
                 `,
                 render: () => `
@@ -246,7 +246,7 @@
                     </div>
                     <div class="flex gap-2 mt-4">
                         <button onclick="runSim3('legacy')" class="flex-1 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded text-xs transition-colors border border-orange-400 font-bold">1. Legacy: SD-WAN/VPN</button>
-                        <button onclick="runSim3('cynapsa')" class="flex-1 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs transition-colors border border-cyan-400 font-bold shadow-[0_0_10px_rgba(34,211,238,0.3)]">2. Cynapsa Mesh</button>
+                        <button onclick="runSim3('ravetech')" class="flex-1 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs transition-colors border border-cyan-400 font-bold shadow-[0_0_10px_rgba(34,211,238,0.3)]">2. Rave Tech Mesh</button>
                     </div>
                 `,
                 render: () => `
@@ -291,7 +291,7 @@
                     </div>
                     <div class="flex gap-2 mt-4">
                         <button onclick="runSim4('legacy')" class="flex-1 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded text-xs transition-colors border border-orange-400 font-bold">1. Legacy API Gateway</button>
-                        <button onclick="runSim4('cynapsa')" class="flex-1 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs transition-colors border border-cyan-400 font-bold shadow-[0_0_10px_rgba(34,211,238,0.3)]">2. Cynapsa P2P Mesh</button>
+                        <button onclick="runSim4('ravetech')" class="flex-1 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs transition-colors border border-cyan-400 font-bold shadow-[0_0_10px_rgba(34,211,238,0.3)]">2. Rave Tech P2P Mesh</button>
                     </div>
                 `,
                 render: () => `
@@ -396,7 +396,7 @@
                 }, 1500);
 
             } else {
-                if(out) out.innerHTML = `> Initiating Out-of-Band Auth via Cynapsa Control Plane...`;
+                if(out) out.innerHTML = `> Initiating Out-of-Band Auth via Rave Tech Control Plane...`;
                 ccp?.classList.remove('opacity-0');
                 
                 drawLine('node-cloud-agent', 'node-ccp', 'stream-auth', 'auth1');
@@ -407,7 +407,7 @@
                     if(out) out.innerHTML += `<br>> Cryptographic Identity Verified.<br>> P2P Mesh established (Outbound only). Firewall remains Deny-All.`;
                     
                     networkLines.innerHTML = '';
-                    drawLine('node-cloud-agent', 'node-onprem-agent', 'stream-cynapsa');
+                    drawLine('node-cloud-agent', 'node-onprem-agent', 'stream-ravetech');
                     
                     cloudAgent?.classList.replace('border-slate-500', 'border-cyan-500');
                     if(cloudAgent) cloudAgent.style.animation = "shield-glow 2s infinite";
@@ -455,7 +455,7 @@
                 }, 2000);
 
             } else {
-                if(out) out.innerHTML = `> Cynapsa Strategy: Move the Agent to the Data.`;
+                if(out) out.innerHTML = `> Rave Tech Strategy: Move the Agent to the Data.`;
                 
                 if(slotCloudAnalyzer) slotCloudAnalyzer.style.opacity = '0';
                 if(slotCloudAnalyzer) slotCloudAnalyzer.style.transform = 'scale(0.5) translateY(-40px)';
@@ -474,7 +474,7 @@
                         document.getElementById('local-line')?.remove();
                         if(out) out.innerHTML += `<br>> Insight generated. Sending 2KB answer via secure Mesh back to Orchestrator.`;
                         
-                        drawLine('node-analyzer-local', 'node-orchestrator', 'stream-cynapsa');
+                        drawLine('node-analyzer-local', 'node-orchestrator', 'stream-ravetech');
                         const orch = document.getElementById('node-orchestrator');
                         if(orch) orch.style.animation = "shield-glow 2s infinite";
 
@@ -525,14 +525,14 @@
                 }, 1500);
 
             } else {
-                if(out) out.innerHTML = `> Cynapsa Software Overlay deployment initiated...`;
+                if(out) out.innerHTML = `> Rave Tech Software Overlay deployment initiated...`;
                 
                 setTimeout(() => {
                     if(!isSimulating) return;
                     if(out) out.innerHTML += `<br>> Connecting AWS, Azure, and On-Prem using Identity...`;
-                    drawLine('node-env1', 'node-env2', 'stream-cynapsa');
-                    drawLine('node-env2', 'node-env3', 'stream-cynapsa');
-                    drawLine('node-env1', 'node-env3', 'stream-cynapsa');
+                    drawLine('node-env1', 'node-env2', 'stream-ravetech');
+                    drawLine('node-env2', 'node-env3', 'stream-ravetech');
+                    drawLine('node-env1', 'node-env3', 'stream-ravetech');
                     
                     ['env1', 'env2', 'env3'].forEach(id => {
                         const el = document.getElementById(`node-${id}`)?.firstElementChild;
@@ -603,18 +603,18 @@
                 }, 1500);
 
             } else {
-                if(out) out.innerHTML = `> Cynapsa Agentic Microsegmentation active.<br>> Ag-1 talking to Ag-2...`;
+                if(out) out.innerHTML = `> Rave Tech Agentic Microsegmentation active.<br>> Ag-1 talking to Ag-2...`;
                 if(gw) gw.style.opacity = '0.2';
                 
-                drawLine('swarm-1', 'swarm-2', 'stream-cynapsa', 'C1');
+                drawLine('swarm-1', 'swarm-2', 'stream-ravetech', 'C1');
                 document.getElementById('swarm-1')?.classList.replace('border-slate-500', 'border-cyan-500');
                 document.getElementById('swarm-2')?.classList.replace('border-slate-500', 'border-cyan-500');
 
                 setTimeout(() => {
                     if(!isSimulating) return;
                     if(out) out.innerHTML += `<br>> Ag-4 and Ag-5 talking to DB...`;
-                    drawLine('swarm-4', 'node-target', 'stream-cynapsa', 'C2');
-                    drawLine('swarm-5', 'node-target', 'stream-cynapsa', 'C3');
+                    drawLine('swarm-4', 'node-target', 'stream-ravetech', 'C2');
+                    drawLine('swarm-5', 'node-target', 'stream-ravetech', 'C3');
                     
                     document.getElementById('swarm-4')?.classList.replace('border-slate-500', 'border-cyan-500');
                     document.getElementById('swarm-5')?.classList.replace('border-slate-500', 'border-cyan-500');
@@ -633,7 +633,7 @@
                         
                         setTimeout(() => {
                             if(!isSimulating) return;
-                            if(out) out.innerHTML += `<br><span class="text-green-400 font-bold">> CONTAINED: Ag-3 isolated. Cynapsa drops unauthorized P2P requests. Blast radius = 0.</span>`;
+                            if(out) out.innerHTML += `<br><span class="text-green-400 font-bold">> CONTAINED: Ag-3 isolated. Rave Tech drops unauthorized P2P requests. Blast radius = 0.</span>`;
                             
                             const block1 = drawLine('swarm-3', 'swarm-2', 'stream-danger');
                             const block2 = drawLine('swarm-3', 'swarm-4', 'stream-danger');

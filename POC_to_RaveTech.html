@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Evolution of Agentic Networking | Cynapsa</title>
+    <title>The Evolution of Agentic Networking | Rave Tech</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom Animations */
@@ -61,7 +61,7 @@
         <div>
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-white mb-2 leading-tight">The Agentic <br><span class="text-cyan-400">Networking Crisis</span></h1>
-                <p class="text-sm text-slate-400">See why legacy IT infrastructure fails autonomous AI, and how Cynapsa fixes it.</p>
+                <p class="text-sm text-slate-400">See why legacy IT infrastructure fails autonomous AI, and how Rave Tech fixes it.</p>
             </div>
 
             <!-- Stage Navigation -->
@@ -91,7 +91,7 @@
                 <button onclick="setStage(3)" id="btn-step3" class="w-full text-left flex items-start p-4 rounded-xl transition-all border-2 border-transparent hover:bg-slate-700/50 relative">
                     <div id="dot-step3" class="w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">3</div>
                     <div>
-                        <h3 class="text-white font-semibold text-lg">Cynapsa Mesh</h3>
+                        <h3 class="text-white font-semibold text-lg">Rave Tech Mesh</h3>
                         <p class="text-sm text-slate-400 mt-1">Identity-native, portless mesh with automated, decentralized agent load balancing.</p>
                     </div>
                 </button>
@@ -213,13 +213,13 @@
                 `
             },
             3: {
-                title: "Cynapsa Mesh",
+                title: "Rave Tech Mesh",
                 panelHtml: `
-                    <h4 class="text-cyan-400 font-bold mb-2">The Cynapsa Solution</h4>
+                    <h4 class="text-cyan-400 font-bold mb-2">The Rave Tech Solution</h4>
                     <p class="text-sm text-slate-300 mb-4">A portless, identity-native overlay. The mesh inherently understands agent identity and load balances natively, replacing the entire legacy stack.</p>
                     <div class="space-y-2">
-                        <button onclick="simulateCynapsa('connect')" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-sm transition-colors border border-cyan-400 font-medium">1. Establish Portless Mesh</button>
-                        <button onclick="simulateCynapsa('failover')" id="btn-failover" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white rounded text-sm transition-colors border border-slate-500 opacity-50 cursor-not-allowed" disabled>2. Simulate Instance Failure (Native LB)</button>
+                        <button onclick="simulateRaveTech('connect')" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-sm transition-colors border border-cyan-400 font-medium">1. Establish Portless Mesh</button>
+                        <button onclick="simulateRaveTech('failover')" id="btn-failover" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white rounded text-sm transition-colors border border-slate-500 opacity-50 cursor-not-allowed" disabled>2. Simulate Instance Failure (Native LB)</button>
                     </div>
                 `,
                 render: () => `
@@ -230,15 +230,15 @@
                             
                             <!-- Many Agents -->
                             <div class="flex justify-between w-full mt-6 px-2">
-                               <div id="node-cyn-ag1" class="w-10 h-10 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-sm z-20 shadow-[0_0_10px_#22d3ee]">🤖</div>
-                               <div id="node-cyn-ag2" class="w-10 h-10 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-sm z-20 shadow-[0_0_10px_#22d3ee]">🤖</div>
-                               <div id="node-cyn-ag3" class="w-10 h-10 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-sm z-20 shadow-[0_0_10px_#22d3ee]">🤖</div>
-                               <div id="node-cyn-ag4" class="w-10 h-10 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-sm z-20 shadow-[0_0_10px_#22d3ee]">🤖</div>
+                               <div id="node-rt-ag1" class="w-10 h-10 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-sm z-20 shadow-[0_0_10px_#22d3ee]">🤖</div>
+                               <div id="node-rt-ag2" class="w-10 h-10 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-sm z-20 shadow-[0_0_10px_#22d3ee]">🤖</div>
+                               <div id="node-rt-ag3" class="w-10 h-10 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-sm z-20 shadow-[0_0_10px_#22d3ee]">🤖</div>
+                               <div id="node-rt-ag4" class="w-10 h-10 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-sm z-20 shadow-[0_0_10px_#22d3ee]">🤖</div>
                             </div>
                             
-                            <!-- Cynapsa Mesh Node (Replaces LB + API GW) -->
-                            <div id="node-cyn-cloud-mesh" class="w-56 h-12 mt-16 bg-slate-800 border-2 border-cyan-500 border-dashed flex items-center justify-center text-xs font-bold text-cyan-400 z-20 rounded shadow-[0_0_15px_rgba(34,211,238,0.2)]">
-                                Cynapsa Identity Mesh
+                            <!-- Rave Tech Mesh Node (Replaces LB + API GW) -->
+                            <div id="node-rt-cloud-mesh" class="w-56 h-12 mt-16 bg-slate-800 border-2 border-cyan-500 border-dashed flex items-center justify-center text-xs font-bold text-cyan-400 z-20 rounded shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+                                Rave Tech Identity Mesh
                             </div>
                         </div>
 
@@ -248,18 +248,18 @@
                             
                             <!-- Load Balanced Instances (Replaces API GW + Internal LB) -->
                             <div class="flex justify-center gap-12 w-full mt-8 relative">
-                                <div id="env-cyn-inst1" class="flex flex-col items-center relative">
-                                    <div id="node-cyn-inst1" class="w-14 h-14 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-xl z-20 shadow-[0_0_10px_#22d3ee]">⚙️1</div>
+                                <div id="env-rt-inst1" class="flex flex-col items-center relative">
+                                    <div id="node-rt-inst1" class="w-14 h-14 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-xl z-20 shadow-[0_0_10px_#22d3ee]">⚙️1</div>
                                     <div class="text-[9px] text-cyan-300 mt-2">Data Agent 1</div>
                                     <div id="fail-x1" class="absolute top-0 text-5xl text-red-500 font-bold hidden z-30 drop-shadow-md">X</div>
                                 </div>
-                                <div id="env-cyn-inst2" class="flex flex-col items-center relative">
-                                    <div id="node-cyn-inst2" class="w-14 h-14 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-xl z-20 shadow-[0_0_10px_#22d3ee]">⚙️2</div>
+                                <div id="env-rt-inst2" class="flex flex-col items-center relative">
+                                    <div id="node-rt-inst2" class="w-14 h-14 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-xl z-20 shadow-[0_0_10px_#22d3ee]">⚙️2</div>
                                     <div class="text-[9px] text-cyan-300 mt-2">Data Agent 2</div>
                                 </div>
                             </div>
 
-                            <div id="node-cyn-onprem-db" class="w-16 h-16 mt-12 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-2xl z-20 shadow-[0_0_10px_#22d3ee]">🗄️</div>
+                            <div id="node-rt-onprem-db" class="w-16 h-16 mt-12 bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-2xl z-20 shadow-[0_0_10px_#22d3ee]">🗄️</div>
                             <div class="mt-2 text-xs font-bold text-slate-300">Secure Database</div>
                         </div>
                     </div>
@@ -366,13 +366,13 @@
             }
         }
 
-        // --- Stage 3 Logic (Cynapsa Mesh) ---
-        function simulateCynapsa(action) {
+        // --- Stage 3 Logic (Rave Tech Mesh) ---
+        function simulateRaveTech(action) {
             networkLines.innerHTML = '';
             
             const drawInternalCloud = () => {
                 ['ag1', 'ag2', 'ag3', 'ag4'].forEach(id => {
-                    drawLine(`node-cyn-${id}`, 'node-cyn-cloud-mesh', '#334155', 'data-stream-mesh-idle', 2, '4 4');
+                    drawLine(`node-rt-${id}`, 'node-rt-cloud-mesh', '#334155', 'data-stream-mesh-idle', 2, '4 4');
                 });
             };
 
@@ -380,15 +380,15 @@
                 drawInternalCloud();
 
                 // Draw Mesh Idle Lines
-                drawMeshLineIdle('node-cyn-cloud-mesh', 'node-cyn-inst2');
-                drawMeshLineIdle('node-cyn-inst2', 'node-cyn-onprem-db');
+                drawMeshLineIdle('node-rt-cloud-mesh', 'node-rt-inst2');
+                drawMeshLineIdle('node-rt-inst2', 'node-rt-onprem-db');
 
                 // Draw Active Load Balanced Path
-                drawLine('node-cyn-cloud-mesh', 'node-cyn-inst1', '#22d3ee', 'data-stream-mesh', 3);
-                drawLine('node-cyn-inst1', 'node-cyn-onprem-db', '#22d3ee', 'data-stream-mesh', 3);
+                drawLine('node-rt-cloud-mesh', 'node-rt-inst1', '#22d3ee', 'data-stream-mesh', 3);
+                drawLine('node-rt-inst1', 'node-rt-onprem-db', '#22d3ee', 'data-stream-mesh', 3);
 
                 // Animate nodes pulsing
-                ['cyn-cloud-mesh', 'cyn-inst1', 'cyn-inst2', 'cyn-onprem-db'].forEach(id => {
+                ['rt-cloud-mesh', 'rt-inst1', 'rt-inst2', 'rt-onprem-db'].forEach(id => {
                     document.getElementById(`node-${id}`).style.animation = "shield-glow 2s infinite";
                 });
 
@@ -401,7 +401,7 @@
                 drawInternalCloud();
 
                 // Kill Instance 1
-                const inst1Node = document.getElementById('node-cyn-inst1');
+                const inst1Node = document.getElementById('node-rt-inst1');
                 const failX = document.getElementById('fail-x1');
                 
                 inst1Node.classList.remove('border-cyan-500');
@@ -410,13 +410,13 @@
                 failX.classList.remove('hidden');
 
                 // Visual red lines for broken paths
-                drawLine('node-cyn-cloud-mesh', 'node-cyn-inst1', '#ef4444', '', 2, '5 5');
+                drawLine('node-rt-cloud-mesh', 'node-rt-inst1', '#ef4444', '', 2, '5 5');
 
                 // Simulate NATIVE LOAD BALANCING: instantly routing to Instance 2
-                drawLine('node-cyn-cloud-mesh', 'node-cyn-inst2', '#22d3ee', 'data-stream-mesh', 4);
-                drawLine('node-cyn-inst2', 'node-cyn-onprem-db', '#22d3ee', 'data-stream-mesh', 4);
+                drawLine('node-rt-cloud-mesh', 'node-rt-inst2', '#22d3ee', 'data-stream-mesh', 4);
+                drawLine('node-rt-inst2', 'node-rt-onprem-db', '#22d3ee', 'data-stream-mesh', 4);
 
-                actionPanel.innerHTML += `<p class="mt-2 text-green-400 text-xs font-bold font-mono">> NATIVE LOAD BALANCING: Instance 1 failed. The Cynapsa mesh automatically rerouted payloads to Instance 2 without a central load balancer.</p>`;
+                actionPanel.innerHTML += `<p class="mt-2 text-green-400 text-xs font-bold font-mono">> NATIVE LOAD BALANCING: Instance 1 failed. The Rave Tech mesh automatically rerouted payloads to Instance 2 without a central load balancer.</p>`;
             }
         }
 
