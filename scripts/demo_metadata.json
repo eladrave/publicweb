@@ -1,1 +1,7 @@
-{}
+{
+  "observibility.html": {
+    "description": "See how Cynapsa addresses the legacy failure of code-injected logging by providing visibility across owned, third-party, and unmanaged agents with zero code changes and mesh-delivered telemetry.",
+    "eyebrow": "Agentic Observability",
+    "title": "Visibility and Control"
+  }
+}
