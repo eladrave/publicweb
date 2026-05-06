@@ -1,1 +1,12 @@
-{}
+{
+  "llm_and_ai_security.html": {
+    "description": "This demo contrasts a legacy AI networking setup that opens a firewall port and leaves the server exposed, with Cynapsa\u2019s zero-trust Layer 3/4 mesh that keeps firewalls closed while Layer 7 tools inspect the AI payload safely.",
+    "eyebrow": "Defense in depth",
+    "title": "Securing the Pipes vs. the Water"
+  },
+  "observibility.html": {
+    "description": "See how Cynapsa addresses the legacy failure of code-injected logging by providing visibility across owned, third-party, and unmanaged agents with zero code changes and mesh-delivered telemetry.",
+    "eyebrow": "Agentic Observability",
+    "title": "Visibility and Control"
+  }
+}
