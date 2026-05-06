@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cynapsa: Visibility & Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Core Animations */
+        @keyframes flow-fast { to { stroke-dashoffset: -20; } }
+        @keyframes flow-slow { to { stroke-dashoffset: -20; } }
+        @keyframes pulse-error {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+        }
+        @keyframes shield-glow-indigo {
+            0%, 100% { box-shadow: 0 0 10px rgba(99, 102, 241, 0.4); border-color: #6366f1; }
+            50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.8); border-color: #818cf8; }
+        }
+        @keyframes spin-slow { 100% { transform: rotate(360deg); } }
+
+        /* Line Styles */
+        .stream-legacy-log { stroke-dasharray: 6 6; animation: flow-slow 0.8s linear infinite; stroke: #4ade80; stroke-width: 2; opacity: 0.8; }
+        .stream-legacy-fail { stroke-dasharray: 4 4; stroke: #ef4444; stroke-width: 2; opacity: 0.5; stroke-linecap: round;}
+        .stream-otel { stroke-dasharray: 8 8; animation: flow-fast 0.4s linear infinite; stroke: #818cf8; stroke-width: 3; filter: drop-shadow(0 0 5px #818cf8); opacity: 1; }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Agent Base */
+        .agent-node { transition: all 0.5s ease; position: relative; z-index: 20; }
+        .agent-node.sdk-failed { border-color: #ef4444 !important; }
+        .agent-node.sdk-success { border-color: #4ade80 !important; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 font-sans h-screen w-screen overflow-hidden flex">
+
+    <!-- Sidebar Narrative Panel -->
+    <div class="w-1/3 bg-slate-900 border-r border-slate-800 p-8 flex flex-col justify-between z-30 shadow-[10px_0_30px_rgba(0,0,0,0.5)] overflow-y-auto">
+        <div>
+            <div class="mb-6 border-b border-slate-800 pb-6">
+                <div class="text-cyan-400 font-bold tracking-widest text-[10px] mb-2 uppercase">Agentic Observability</div>
+                <h1 class="text-3xl font-bold text-white mb-2 leading-tight">Visibility and <br><span class="text-slate-400">Control</span></h1>
+                <p class="text-sm text-slate-400 mt-3">Relying on developers to implement logging inside agent code fails the moment you introduce 3rd-party or unmanaged agents. Cynapsa solves this by extracting telemetry natively at the network layer.</p>
+            </div>
+
+            <!-- Architecture Toggle -->
+            <div class="space-y-3 relative mb-6">
+                <div class="absolute left-[15px] top-4 bottom-4 w-0.5 bg-slate-800 -z-10"></div>
+
+                <button onclick="setMode('legacy')" id="btn-legacy" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.1)] relative group">
+                    <div id="dot-legacy" class="w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]">1</div>
+                    <div>
+                        <h3 class="text-white font-semibold text-md">Before Cynapsa (Code Injection)</h3>
+                        <p class="text-xs text-slate-400 mt-1">Requires modifying the code of every agent. Fails on 3rd-party/vendor agents, creating blind spots.</p>
+                    </div>
+                </button>
+
+                <button onclick="setMode('cynapsa')" id="btn-cynapsa" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-transparent hover:bg-slate-800/50 relative group">
+                    <div id="dot-cynapsa" class="w-8 h-8 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
+                    <div>
+                        <h3 class="text-slate-300 group-hover:text-white font-semibold text-md">With Cynapsa (Mesh Telemetry)</h3>
+                        <p class="text-xs text-slate-500 group-hover:text-slate-400 mt-1">Zero code changes. The mesh streams OpenTelemetry directly to your SIEM for 100% of agents.</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Action Panel -->
+        <div id="action-panel" class="mt-2 p-5 bg-slate-950 rounded-xl border border-slate-800 flex flex-col min-h-[260px]">
+            <!-- Injected via JS -->
+        </div>
+    </div>
+
+    <!-- Main Interactive Canvas -->
+    <div class="w-2/3 bg-[#050811] relative overflow-hidden flex items-center justify-center" id="canvas-container">
+        <!-- Background Grid -->
+        <div class="absolute inset-0 z-0 opacity-20" style="background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 20px 20px;"></div>
+        
+        <!-- SVG Layer for Network Lines -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" id="network-lines"></svg>
+
+        <!-- Static Environment Layout -->
+        <div class="w-full h-full relative z-20 p-8 pt-24">
+            
+            <!-- Central SIEM / Datadog Dashboard -->
+            <div id="node-siem" class="absolute top-8 left-1/2 -translate-x-1/2 w-64 h-20 bg-slate-900 border-2 border-slate-600 rounded-xl flex flex-col items-center justify-center z-40 transition-all duration-500 shadow-lg">
+                <span class="text-2xl">📊</span>
+                <span class="text-[10px] font-bold text-slate-300 mt-1 uppercase tracking-widest">Enterprise SIEM / Datadog</span>
+            </div>
+
+            <!-- AWS Region (Internal/Owned) -->
+            <div class="absolute top-40 left-12 w-[40%] h-[35%] border-2 border-slate-700 bg-slate-800/30 rounded-xl p-3 flex flex-col items-center">
+                <div class="text-[10px] font-mono text-slate-400 mb-2">INTERNAL CLOUD (Owned Code)</div>
+                <div class="flex flex-wrap gap-6 items-center justify-center flex-grow" id="env-internal">
+                    <div id="ag-int-1" class="agent-node w-14 h-14 bg-slate-800 border-2 border-slate-500 rounded-lg flex flex-col items-center justify-center text-2xl shadow-lg relative">🤖<span class="absolute -bottom-5 text-[8px] text-slate-400 font-bold whitespace-nowrap">Internal-Ag1</span></div>
+                    <div id="ag-int-2" class="agent-node w-14 h-14 bg-slate-800 border-2 border-slate-500 rounded-lg flex flex-col items-center justify-center text-2xl shadow-lg relative">🤖<span class="absolute -bottom-5 text-[8px] text-slate-400 font-bold whitespace-nowrap">Internal-Ag2</span></div>
+                </div>
+            </div>
+
+            <!-- GCP / 3rd Party Region (Vendor/External) -->
+            <div class="absolute top-40 right-12 w-[40%] h-[35%] border-2 border-slate-700 bg-slate-800/30 rounded-xl p-3 flex flex-col items-center">
+                <div class="text-[10px] font-mono text-slate-400 mb-2">3RD-PARTY PROVIDER (Closed Source)</div>
+                <div class="flex flex-wrap gap-6 items-center justify-center flex-grow" id="env-external">
+                    <div id="ag-ext-1" class="agent-node w-14 h-14 bg-slate-800 border-2 border-slate-500 rounded-lg flex flex-col items-center justify-center text-2xl shadow-lg relative">👽<span class="absolute -bottom-5 text-[8px] text-slate-400 font-bold whitespace-nowrap">Vendor-Ag1</span></div>
+                    <div id="ag-ext-2" class="agent-node w-14 h-14 bg-slate-800 border-2 border-slate-500 rounded-lg flex flex-col items-center justify-center text-2xl shadow-lg relative">👽<span class="absolute -bottom-5 text-[8px] text-slate-400 font-bold whitespace-nowrap">Vendor-Ag2</span></div>
+                </div>
+            </div>
+
+            <!-- Local Laptops (Shadow AI) -->
+            <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-[60%] h-[25%] border-2 border-slate-700 bg-slate-800/30 rounded-xl p-3 flex flex-col items-center">
+                <div class="text-[10px] font-mono text-slate-400 mb-2">EMPLOYEE LAPTOPS (Unmanaged)</div>
+                <div class="flex flex-wrap gap-8 items-center justify-center flex-grow" id="env-local">
+                    <div id="ag-loc-1" class="agent-node w-12 h-12 bg-slate-800 border-2 border-slate-500 rounded-full flex flex-col items-center justify-center text-xl shadow-lg relative">💻<span class="absolute -bottom-5 text-[8px] text-slate-400 font-bold whitespace-nowrap">Shadow-Ag1</span></div>
+                    <div id="ag-loc-2" class="agent-node w-12 h-12 bg-slate-800 border-2 border-slate-500 rounded-full flex flex-col items-center justify-center text-xl shadow-lg relative">💻<span class="absolute -bottom-5 text-[8px] text-slate-400 font-bold whitespace-nowrap">Shadow-Ag2</span></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const canvasStage = document.getElementById('canvas-stage');
+        const networkLines = document.getElementById('network-lines');
+        const actionPanel = document.getElementById('action-panel');
+
+        let currentMode = 'legacy';
+        let isSimulating = false;
+
+        const uiPanels = {
+            legacy: `
+                <div class="flex-grow">
+                    <h4 class="text-orange-400 font-bold mb-2 uppercase text-[11px] tracking-widest">Legacy: Agent-Level Code Injection</h4>
+                    <p class="text-sm text-slate-300 mb-2">You must manually add logging SDKs to the source code of every single agent.</p>
+                    <div id="terminal-out" class="p-2 bg-slate-900 rounded border border-slate-700 text-xs font-mono text-slate-400 min-h-[5rem] overflow-y-auto">
+                        > Preparing to instrument fleet...<br>> Awaiting command.
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="runLegacyDeploy()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs transition-colors border border-slate-600 shadow-md">1. Deploy Logging SDKs</button>
+                    <button onclick="runLegacyMonitor()" class="flex-1 py-2 bg-indigo-900 hover:bg-indigo-800 text-white rounded text-xs transition-colors border border-indigo-500 font-bold shadow-[0_0_10px_rgba(99,102,241,0.3)]">2. View SIEM Dashboard</button>
+                </div>
+            `,
+            cynapsa: `
+                <div class="flex-grow">
+                    <h4 class="text-cyan-400 font-bold mb-2 uppercase text-[11px] tracking-widest">Cynapsa: Mesh-Level Telemetry</h4>
+                    <p class="text-sm text-slate-300 mb-2">Zero code changes required. The Cynapsa network layer inherently sees and extracts OpenTelemetry from all routing traffic.</p>
+                    <div id="terminal-out" class="p-2 bg-slate-900 rounded border border-slate-700 text-xs font-mono text-slate-400 min-h-[5rem] overflow-y-auto">
+                        > Cynapsa Mesh initialized.<br>> Awaiting command.
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="runCynapsaDeploy()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs transition-colors border border-slate-600 shadow-md">1. Enable Cynapsa Mesh</button>
+                    <button onclick="runCynapsaMonitor()" class="flex-1 py-2 bg-indigo-900 hover:bg-indigo-800 text-white rounded text-xs transition-colors border border-indigo-500 font-bold shadow-[0_0_10px_rgba(99,102,241,0.3)]">2. View SIEM Dashboard</button>
+                </div>
+            `
+        };
+
+        function setMode(mode) {
+            if (isSimulating) return;
+            currentMode = mode;
+            networkLines.innerHTML = '';
+            
+            const btnLegacy = document.getElementById('btn-legacy');
+            const btnCynapsa = document.getElementById('btn-cynapsa');
+            const dotLegacy = document.getElementById('dot-legacy');
+            const dotCynapsa = document.getElementById('dot-cynapsa');
+
+            if (mode === 'legacy') {
+                btnLegacy?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotLegacy?.classList.replace('bg-slate-800', 'bg-cyan-500');
+                dotLegacy?.classList.replace('text-slate-500', 'text-slate-900');
+                btnLegacy?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
+
+                btnCynapsa?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotCynapsa?.classList.replace('bg-cyan-500', 'bg-slate-800');
+                dotCynapsa?.classList.replace('text-slate-900', 'text-slate-500');
+                btnCynapsa?.querySelector('h3')?.classList.replace('text-white', 'text-slate-300');
+
+                document.getElementById('node-siem').classList.replace('border-indigo-500', 'border-slate-600');
+                document.getElementById('node-siem').style.animation = 'none';
+
+            } else {
+                btnCynapsa?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotCynapsa?.classList.replace('bg-slate-800', 'bg-cyan-500');
+                dotCynapsa?.classList.replace('text-slate-500', 'text-slate-900');
+                btnCynapsa?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
+
+                btnLegacy?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotLegacy?.classList.replace('bg-cyan-500', 'bg-slate-800');
+                dotLegacy?.classList.replace('text-slate-900', 'text-slate-500');
+                btnLegacy?.querySelector('h3')?.classList.replace('text-white', 'text-slate-300');
+            }
+
+            if(actionPanel) actionPanel.innerHTML = uiPanels[mode];
+            resetAgents();
+        }
+
+        function resetAgents() {
+            document.querySelectorAll('.agent-node').forEach(el => {
+                el.classList.remove('sdk-success', 'sdk-failed');
+                el.style.animation = 'none';
+                el.style.boxShadow = 'none';
+                el.style.borderColor = '#64748b'; // reset to slate-500
+                const icon = el.querySelector('.status-icon');
+                if (icon) icon.remove();
+            });
+            document.getElementById('node-siem').classList.replace('border-indigo-500', 'border-slate-600');
+            document.getElementById('node-siem').style.animation = 'none';
+        }
+
+        // --- LEGACY SIMULATIONS ---
+
+        function runLegacyDeploy() {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            resetAgents();
+            const out = document.getElementById('terminal-out');
+            
+            if(out) out.innerHTML = `> Pushing Splunk/Datadog SDKs to agent codebase...<br>> Re-compiling and deploying...`;
+
+            setTimeout(() => {
+                if(!isSimulating) return;
+                
+                // Internal Agents (Success)
+                ['ag-int-1', 'ag-int-2'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) {
+                        el.classList.add('sdk-success');
+                        el.innerHTML += `<div class="status-icon absolute -top-3 -right-2 text-sm z-50">✅</div>`;
+                    }
+                });
+                
+                // 3rd Party Agents (Fail - Cannot modify code)
+                ['ag-ext-1', 'ag-ext-2'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) {
+                        el.classList.add('sdk-failed');
+                        el.innerHTML += `<div class="status-icon absolute -top-3 -right-2 text-sm z-50 animate-bounce drop-shadow-[0_0_5px_#ef4444]">🚫</div>`;
+                    }
+                });
+
+                // Local Laptops (Fail - Unmanaged/Shadow AI)
+                ['ag-loc-1', 'ag-loc-2'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) {
+                        el.classList.add('sdk-failed');
+                        el.innerHTML += `<div class="status-icon absolute -top-3 -right-2 text-sm z-50 animate-bounce drop-shadow-[0_0_5px_#ef4444]">🚫</div>`;
+                    }
+                });
+
+                if(out) out.innerHTML += `<br><span class="text-orange-400">> PARTIAL DEPLOYMENT: Code injection failed on 3rd-party vendors and unmanaged shadow devices.</span>`;
+                setTimeout(() => { isSimulating = false; }, 1000);
+            }, 1500);
+        }
+
+        function runLegacyMonitor() {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            const out = document.getElementById('terminal-out');
+            
+            if (!document.querySelector('.sdk-success')) {
+                if(out) out.innerHTML = `> Error: You must deploy SDKs first.`;
+                isSimulating = false;
+                return;
+            }
+
+            if(out) out.innerHTML = `> Aggregating telemetry at SIEM...`;
+
+            // Draw lines ONLY from successful agents
+            ['ag-int-1', 'ag-int-2'].forEach(id => {
+                drawLine(id, 'node-siem', 'stream-legacy-log');
+            });
+
+            // Draw broken lines for failed ones
+            ['ag-ext-1', 'ag-ext-2', 'ag-loc-1', 'ag-loc-2'].forEach(id => {
+                const line = drawLine(id, 'node-siem', 'stream-legacy-fail');
+                if (line) {
+                    // Make it look like it's failing halfway
+                    line.style.strokeDasharray = "5 15";
+                }
+            });
+
+            setTimeout(() => {
+                if(!isSimulating) return;
+                document.getElementById('node-siem').classList.replace('border-slate-600', 'border-indigo-500');
+                if(out) out.innerHTML += `<br><span class="text-red-500 font-bold">> MASSIVE BLIND SPOTS: The CISO has zero visibility into 66% of the agentic fleet. Shadow AI is operating completely unmonitored.</span>`;
+                setTimeout(() => { isSimulating = false; }, 1000);
+            }, 1000);
+        }
+
+
+        // --- CYNAPSA SIMULATIONS ---
+
+        function runCynapsaDeploy() {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            resetAgents();
+            const out = document.getElementById('terminal-out');
+            
+            if(out) out.innerHTML = `> Activating Cynapsa Port-less Underlay...<br>> Enveloping all network traffic...`;
+
+            setTimeout(() => {
+                if(!isSimulating) return;
+                
+                // All agents get enveloped by the mesh visually
+                const allAgents = ['ag-int-1', 'ag-int-2', 'ag-ext-1', 'ag-ext-2', 'ag-loc-1', 'ag-loc-2'];
+                allAgents.forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) {
+                        el.style.borderColor = '#818cf8'; // Indigo color
+                        el.style.boxShadow = '0 0 15px rgba(99, 102, 241, 0.5)';
+                        el.innerHTML += `<div class="status-icon absolute -top-3 -right-2 text-[10px] z-50 bg-indigo-900 border border-indigo-400 px-1 rounded text-indigo-200">Mesh</div>`;
+                    }
+                });
+
+                if(out) out.innerHTML += `<br><span class="text-green-400">> SUCCESS: 100% of network traffic intercepted at Layer 3/4. Zero code changes made to agents.</span>`;
+                setTimeout(() => { isSimulating = false; }, 1000);
+            }, 1500);
+        }
+
+        function runCynapsaMonitor() {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            const out = document.getElementById('terminal-out');
+            
+            if (!document.querySelector('.status-icon')) {
+                if(out) out.innerHTML = `> Error: You must enable Cynapsa Mesh first.`;
+                isSimulating = false;
+                return;
+            }
+
+            if(out) out.innerHTML = `> Cynapsa Mesh exporting native OpenTelemetry to SIEM...`;
+
+            // Draw strong OTel lines from ALL agents
+            const allAgents = ['ag-int-1', 'ag-int-2', 'ag-ext-1', 'ag-ext-2', 'ag-loc-1', 'ag-loc-2'];
+            allAgents.forEach(id => {
+                drawLine(id, 'node-siem', 'stream-otel');
+            });
+
+            setTimeout(() => {
+                if(!isSimulating) return;
+                const siem = document.getElementById('node-siem');
+                if (siem) {
+                    siem.classList.replace('border-slate-600', 'border-indigo-500');
+                    siem.style.animation = 'shield-glow-indigo 2s infinite';
+                }
+                
+                if(out) out.innerHTML += `<br><span class="text-cyan-400 font-bold">> 100% VISIBILITY ACHIEVED: SIEM is receiving real-time logs, identities, and threat contexts for every agent—even 3rd party vendors and Shadow AI.</span>`;
+                setTimeout(() => { isSimulating = false; }, 1000);
+            }, 1000);
+        }
+
+        // --- Helpers ---
+        function drawLine(id1, id2, cssClass, domId = null) {
+            const el1 = document.getElementById(id1);
+            const el2 = document.getElementById(id2);
+            if (!el1 || !el2) return null;
+
+            const rect1 = el1.getBoundingClientRect();
+            const rect2 = el2.getBoundingClientRect();
+            const containerRect = document.getElementById('canvas-container').getBoundingClientRect();
+
+            const x1 = rect1.left + rect1.width/2 - containerRect.left;
+            const y1 = rect1.top + rect1.height/2 - containerRect.top;
+            const x2 = rect2.left + rect2.width/2 - containerRect.left;
+            const y2 = rect2.top + rect2.height/2 - containerRect.top;
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('class', cssClass);
+            if(domId) line.setAttribute('id', domId);
+
+            networkLines.appendChild(line);
+            return line;
+        }
+
+        // Expose globally
+        window.setMode = setMode;
+        window.runLegacyDeploy = runLegacyDeploy;
+        window.runLegacyMonitor = runLegacyMonitor;
+        window.runCynapsaDeploy = runCynapsaDeploy;
+        window.runCynapsaMonitor = runCynapsaMonitor;
+
+        // Init
+        window.onload = () => {
+            setTimeout(() => setMode('legacy'), 100);
+        };
+        window.addEventListener('resize', () => {
+            if(!isSimulating) setMode(currentMode);
+        });
+    </script>
+</body>
+</html>
