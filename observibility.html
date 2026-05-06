@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cynapsa: Visibility & Control</title>
+    <title>Rave Tech: Visibility & Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Core Animations */
@@ -46,7 +46,7 @@
             <div class="mb-6 border-b border-slate-800 pb-6">
                 <div class="text-cyan-400 font-bold tracking-widest text-[10px] mb-2 uppercase">Agentic Observability</div>
                 <h1 class="text-3xl font-bold text-white mb-2 leading-tight">Visibility and <br><span class="text-slate-400">Control</span></h1>
-                <p class="text-sm text-slate-400 mt-3">Relying on developers to implement logging inside agent code fails the moment you introduce 3rd-party or unmanaged agents. Cynapsa solves this by extracting telemetry natively at the network layer.</p>
+                <p class="text-sm text-slate-400 mt-3">Relying on developers to implement logging inside agent code fails the moment you introduce 3rd-party or unmanaged agents. Rave Tech solves this by extracting telemetry natively at the network layer.</p>
             </div>
 
             <!-- Architecture Toggle -->
@@ -56,15 +56,15 @@
                 <button onclick="setMode('legacy')" id="btn-legacy" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.1)] relative group">
                     <div id="dot-legacy" class="w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]">1</div>
                     <div>
-                        <h3 class="text-white font-semibold text-md">Before Cynapsa (Code Injection)</h3>
+                        <h3 class="text-white font-semibold text-md">Before Rave Tech (Code Injection)</h3>
                         <p class="text-xs text-slate-400 mt-1">Requires modifying the code of every agent. Fails on 3rd-party/vendor agents, creating blind spots.</p>
                     </div>
                 </button>
 
-                <button onclick="setMode('cynapsa')" id="btn-cynapsa" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-transparent hover:bg-slate-800/50 relative group">
-                    <div id="dot-cynapsa" class="w-8 h-8 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
+                <button onclick="setMode('ravetech')" id="btn-ravetech" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-transparent hover:bg-slate-800/50 relative group">
+                    <div id="dot-ravetech" class="w-8 h-8 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
                     <div>
-                        <h3 class="text-slate-300 group-hover:text-white font-semibold text-md">With Cynapsa (Mesh Telemetry)</h3>
+                        <h3 class="text-slate-300 group-hover:text-white font-semibold text-md">With Rave Tech (Mesh Telemetry)</h3>
                         <p class="text-xs text-slate-500 group-hover:text-slate-400 mt-1">Zero code changes. The mesh streams OpenTelemetry directly to your SIEM for 100% of agents.</p>
                     </div>
                 </button>
@@ -146,17 +146,17 @@
                     <button onclick="runLegacyMonitor()" class="flex-1 py-2 bg-indigo-900 hover:bg-indigo-800 text-white rounded text-xs transition-colors border border-indigo-500 font-bold shadow-[0_0_10px_rgba(99,102,241,0.3)]">2. View SIEM Dashboard</button>
                 </div>
             `,
-            cynapsa: `
+            ravetech: `
                 <div class="flex-grow">
-                    <h4 class="text-cyan-400 font-bold mb-2 uppercase text-[11px] tracking-widest">Cynapsa: Mesh-Level Telemetry</h4>
-                    <p class="text-sm text-slate-300 mb-2">Zero code changes required. The Cynapsa network layer inherently sees and extracts OpenTelemetry from all routing traffic.</p>
+                    <h4 class="text-cyan-400 font-bold mb-2 uppercase text-[11px] tracking-widest">Rave Tech: Mesh-Level Telemetry</h4>
+                    <p class="text-sm text-slate-300 mb-2">Zero code changes required. The Rave Tech network layer inherently sees and extracts OpenTelemetry from all routing traffic.</p>
                     <div id="terminal-out" class="p-2 bg-slate-900 rounded border border-slate-700 text-xs font-mono text-slate-400 min-h-[5rem] overflow-y-auto">
-                        > Cynapsa Mesh initialized.<br>> Awaiting command.
+                        > Rave Tech Mesh initialized.<br>> Awaiting command.
                     </div>
                 </div>
                 <div class="flex gap-2 mt-4">
-                    <button onclick="runCynapsaDeploy()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs transition-colors border border-slate-600 shadow-md">1. Enable Cynapsa Mesh</button>
-                    <button onclick="runCynapsaMonitor()" class="flex-1 py-2 bg-indigo-900 hover:bg-indigo-800 text-white rounded text-xs transition-colors border border-indigo-500 font-bold shadow-[0_0_10px_rgba(99,102,241,0.3)]">2. View SIEM Dashboard</button>
+                    <button onclick="runRaveTechDeploy()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs transition-colors border border-slate-600 shadow-md">1. Enable Rave Tech Mesh</button>
+                    <button onclick="runRaveTechMonitor()" class="flex-1 py-2 bg-indigo-900 hover:bg-indigo-800 text-white rounded text-xs transition-colors border border-indigo-500 font-bold shadow-[0_0_10px_rgba(99,102,241,0.3)]">2. View SIEM Dashboard</button>
                 </div>
             `
         };
@@ -167,9 +167,9 @@
             networkLines.innerHTML = '';
             
             const btnLegacy = document.getElementById('btn-legacy');
-            const btnCynapsa = document.getElementById('btn-cynapsa');
+            const btnRaveTech = document.getElementById('btn-ravetech');
             const dotLegacy = document.getElementById('dot-legacy');
-            const dotCynapsa = document.getElementById('dot-cynapsa');
+            const dotRaveTech = document.getElementById('dot-ravetech');
 
             if (mode === 'legacy') {
                 btnLegacy?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
@@ -177,19 +177,19 @@
                 dotLegacy?.classList.replace('text-slate-500', 'text-slate-900');
                 btnLegacy?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
 
-                btnCynapsa?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
-                dotCynapsa?.classList.replace('bg-cyan-500', 'bg-slate-800');
-                dotCynapsa?.classList.replace('text-slate-900', 'text-slate-500');
-                btnCynapsa?.querySelector('h3')?.classList.replace('text-white', 'text-slate-300');
+                btnRaveTech?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotRaveTech?.classList.replace('bg-cyan-500', 'bg-slate-800');
+                dotRaveTech?.classList.replace('text-slate-900', 'text-slate-500');
+                btnRaveTech?.querySelector('h3')?.classList.replace('text-white', 'text-slate-300');
 
                 document.getElementById('node-siem').classList.replace('border-indigo-500', 'border-slate-600');
                 document.getElementById('node-siem').style.animation = 'none';
 
             } else {
-                btnCynapsa?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
-                dotCynapsa?.classList.replace('bg-slate-800', 'bg-cyan-500');
-                dotCynapsa?.classList.replace('text-slate-500', 'text-slate-900');
-                btnCynapsa?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
+                btnRaveTech?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotRaveTech?.classList.replace('bg-slate-800', 'bg-cyan-500');
+                dotRaveTech?.classList.replace('text-slate-500', 'text-slate-900');
+                btnRaveTech?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
 
                 btnLegacy?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
                 dotLegacy?.classList.replace('bg-cyan-500', 'bg-slate-800');
@@ -297,16 +297,16 @@
         }
 
 
-        // --- CYNAPSA SIMULATIONS ---
+        // --- RAVE TECH SIMULATIONS ---
 
-        function runCynapsaDeploy() {
+        function runRaveTechDeploy() {
             if (isSimulating) return;
             isSimulating = true;
             networkLines.innerHTML = '';
             resetAgents();
             const out = document.getElementById('terminal-out');
             
-            if(out) out.innerHTML = `> Activating Cynapsa Port-less Underlay...<br>> Enveloping all network traffic...`;
+            if(out) out.innerHTML = `> Activating Rave Tech Port-less Underlay...<br>> Enveloping all network traffic...`;
 
             setTimeout(() => {
                 if(!isSimulating) return;
@@ -327,19 +327,19 @@
             }, 1500);
         }
 
-        function runCynapsaMonitor() {
+        function runRaveTechMonitor() {
             if (isSimulating) return;
             isSimulating = true;
             networkLines.innerHTML = '';
             const out = document.getElementById('terminal-out');
             
             if (!document.querySelector('.status-icon')) {
-                if(out) out.innerHTML = `> Error: You must enable Cynapsa Mesh first.`;
+                if(out) out.innerHTML = `> Error: You must enable Rave Tech Mesh first.`;
                 isSimulating = false;
                 return;
             }
 
-            if(out) out.innerHTML = `> Cynapsa Mesh exporting native OpenTelemetry to SIEM...`;
+            if(out) out.innerHTML = `> Rave Tech Mesh exporting native OpenTelemetry to SIEM...`;
 
             // Draw strong OTel lines from ALL agents
             const allAgents = ['ag-int-1', 'ag-int-2', 'ag-ext-1', 'ag-ext-2', 'ag-loc-1', 'ag-loc-2'];
@@ -391,8 +391,8 @@
         window.setMode = setMode;
         window.runLegacyDeploy = runLegacyDeploy;
         window.runLegacyMonitor = runLegacyMonitor;
-        window.runCynapsaDeploy = runCynapsaDeploy;
-        window.runCynapsaMonitor = runCynapsaMonitor;
+        window.runRaveTechDeploy = runRaveTechDeploy;
+        window.runRaveTechMonitor = runRaveTechMonitor;
 
         // Init
         window.onload = () => {
