@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cynapsa: Frameworks vs. Infrastructure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Core Animations */
+        @keyframes flow-fast { to { stroke-dashoffset: -20; } }
+        @keyframes flow-slow { to { stroke-dashoffset: -20; } }
+        @keyframes pulse-warning {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); }
+        }
+        @keyframes shield-glow-cyan {
+            0%, 100% { box-shadow: 0 0 10px rgba(34, 211, 238, 0.4); border-color: #22d3ee; }
+            50% { box-shadow: 0 0 25px rgba(34, 211, 238, 0.8); border-color: #fff; }
+        }
+        @keyframes payload-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        /* Line Styles */
+        .stream-legacy { stroke-dasharray: 6 6; stroke: #94a3b8; stroke-width: 2; opacity: 0.3; }
+        .stream-l7-payload { stroke-dasharray: 8 8; animation: flow-slow 0.8s linear infinite; stroke: #f59e0b; stroke-width: 3; filter: drop-shadow(0 0 4px #f59e0b); }
+        .stream-cynapsa-tunnel { stroke-dasharray: 2 8; animation: flow-fast 0.5s linear infinite; stroke: #22d3ee; stroke-width: 8; opacity: 0.3; stroke-linecap: round;}
+        .stream-cynapsa-payload { stroke-dasharray: 8 8; animation: flow-fast 0.4s linear infinite; stroke: #4ade80; stroke-width: 3; filter: drop-shadow(0 0 4px #4ade80); }
+        .stream-auth { stroke-dasharray: 4 4; animation: flow-fast 0.6s linear infinite; stroke: #a855f7; stroke-width: 2; }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .firewall-solid { border: 4px solid #dc2626; box-shadow: inset 0 0 20px rgba(220, 38, 38, 0.2); transition: all 0.4s ease; }
+        .firewall-open { border: 4px dashed #f59e0b; box-shadow: inset 0 0 20px rgba(245, 158, 11, 0.2); transition: all 0.4s ease;}
+
+        /* Agent Base */
+        .agent-node { transition: all 0.3s ease; position: relative; z-index: 20; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 font-sans h-screen w-screen overflow-hidden flex">
+
+    <!-- Sidebar Narrative Panel -->
+    <div class="w-1/3 bg-slate-900 border-r border-slate-800 p-8 flex flex-col justify-between z-30 shadow-[10px_0_30px_rgba(0,0,0,0.5)] overflow-y-auto">
+        <div>
+            <div class="mb-6 border-b border-slate-800 pb-6">
+                <div class="text-cyan-400 font-bold tracking-widest text-[10px] mb-2 uppercase">Layer 7 Frameworks vs. Layer 3/4 Underlay</div>
+                <h1 class="text-3xl font-bold text-white mb-2 leading-tight">Agentic SDKs <br><span class="text-slate-400">Assume Connectivity</span></h1>
+                <p class="text-sm text-slate-400 mt-3">Frameworks like <span class="text-white font-semibold">LangGraph, CrewAI, and Google A2A</span> are brilliant at Layer 7—they structure how agents reason and format JSON payloads. <br><br>But they assume the network is a simple HTTP API. They are completely blind to firewalls, NAT, and Zero-Trust infrastructure.</p>
+            </div>
+
+            <div class="space-y-3 relative mb-6">
+                <div class="absolute left-[15px] top-4 bottom-4 w-0.5 bg-slate-800 -z-10"></div>
+
+                <button onclick="setMode('legacy')" id="btn-legacy" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-cyan-500 bg-slate-800 shadow-[0_0_15px_rgba(34,211,238,0.1)] relative group">
+                    <div id="dot-legacy" class="w-8 h-8 rounded-full bg-cyan-500 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10 shadow-[0_0_10px_#22d3ee]">1</div>
+                    <div>
+                        <h3 class="text-white font-semibold text-md">L7 Frameworks on Legacy Networks</h3>
+                        <p class="text-xs text-slate-400 mt-1">Agents use HTTP/REST to send their A2A/LangGraph payloads. This forces you to deploy API Gateways and open firewall ports.</p>
+                    </div>
+                </button>
+
+                <button onclick="setMode('cynapsa')" id="btn-cynapsa" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-transparent hover:bg-slate-800/50 relative group">
+                    <div id="dot-cynapsa" class="w-8 h-8 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
+                    <div>
+                        <h3 class="text-slate-300 group-hover:text-white font-semibold text-md">L7 Frameworks over Cynapsa</h3>
+                        <p class="text-xs text-slate-500 group-hover:text-slate-400 mt-1">Agents still speak LangGraph or A2A, but Cynapsa provides the L3/L4 zero-trust tunnel. Firewalls stay closed. Completely orthogonal and complementary.</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Action Panel -->
+        <div id="action-panel" class="mt-2 p-5 bg-slate-950 rounded-xl border border-slate-800 flex flex-col min-h-[250px]">
+            <!-- Injected via JS -->
+        </div>
+    </div>
+
+    <!-- Main Interactive Canvas -->
+    <div class="w-2/3 bg-[#050811] relative overflow-hidden flex items-center justify-center" id="canvas-container">
+        <div class="absolute inset-0 z-0 opacity-20" style="background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px); background-size: 40px 40px;"></div>
+        
+        <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" id="network-lines"></svg>
+
+        <!-- Static Environment Layout -->
+        <div class="w-full h-full relative z-20 p-8">
+            
+            <!-- Origin Agent (Cloud) -->
+            <div class="absolute top-1/2 left-16 -translate-y-1/2 flex flex-col items-center">
+                <div class="text-[10px] font-mono text-slate-500 mb-2 uppercase">AWS Cloud</div>
+                <div id="node-agent-a" class="w-20 h-20 bg-slate-800 border-2 border-slate-500 rounded-full flex flex-col items-center justify-center text-3xl shadow-lg transition-all z-20 relative">
+                    🤖
+                    <div id="framework-label-a" class="absolute -top-4 bg-slate-900 border border-slate-600 text-[9px] px-2 py-0.5 rounded text-white font-mono opacity-0 transition-opacity whitespace-nowrap">LangGraph SDK</div>
+                </div>
+                <div class="text-xs font-bold text-slate-300 mt-3 text-center">Initiating Agent</div>
+            </div>
+
+            <!-- Legacy Hub (API Gateway) -->
+            <div id="node-api-gw" class="absolute top-1/2 left-[35%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-20 transition-all duration-500">
+                <div class="w-16 h-24 bg-slate-800 border-2 border-orange-500 rounded flex flex-col items-center justify-center text-2xl shadow-[0_0_15px_rgba(245,158,11,0.2)]">🚦</div>
+                <div class="text-[10px] font-bold text-orange-400 mt-2 text-center">Central API<br>Gateway</div>
+            </div>
+
+            <!-- Firewall -->
+            <div class="absolute top-1/2 left-[55%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-20">
+                <div id="node-fw" class="w-6 h-64 firewall-open bg-slate-800 rounded flex flex-col items-center justify-center transition-all duration-300">
+                    <span class="writing-vertical text-[9px] text-orange-400 tracking-widest font-bold mt-2 rotate-180" style="writing-mode: vertical-rl;">FIREWALL</span>
+                </div>
+            </div>
+
+            <!-- Target Agent (On Premise) -->
+            <div class="absolute top-1/2 right-16 -translate-y-1/2 flex flex-col items-center">
+                <div class="text-[10px] font-mono text-slate-500 mb-2 uppercase">On-Premise Server</div>
+                <div id="node-agent-b" class="w-20 h-20 bg-slate-800 border-2 border-slate-500 rounded-lg flex flex-col items-center justify-center text-3xl shadow-lg transition-all z-20 relative">
+                    🗄️
+                    <div id="framework-label-b" class="absolute -top-4 bg-slate-900 border border-slate-600 text-[9px] px-2 py-0.5 rounded text-white font-mono opacity-0 transition-opacity whitespace-nowrap">LangGraph SDK</div>
+                </div>
+                <div class="text-xs font-bold text-slate-300 mt-3 text-center">Target Agent / DB</div>
+            </div>
+
+            <!-- CCP Hub (Used only in Cynapsa) -->
+            <div id="node-ccp" class="absolute top-16 left-1/2 -translate-x-1/2 flex flex-col items-center z-40 transition-all duration-500 opacity-0 scale-50 pointer-events-none">
+                <div class="w-16 h-16 bg-slate-800 border-2 border-purple-500 rounded-full flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(168,85,247,0.4)] relative">🧠</div>
+                <span class="text-[10px] font-bold text-purple-300 mt-2 text-center bg-slate-900/80 px-2 py-1 rounded border border-slate-700">Cynapsa Control Plane</span>
+            </div>
+            
+            <!-- Payload UI Element -->
+            <div id="floating-payload" class="absolute px-3 py-1 bg-slate-900 border border-slate-500 rounded shadow-xl text-[10px] font-mono text-white opacity-0 transition-all z-50 pointer-events-none" style="top: 50%; left: 50%;">
+                { JSON-RPC }
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const canvasStage = document.getElementById('canvas-stage');
+        const networkLines = document.getElementById('network-lines');
+        const actionPanel = document.getElementById('action-panel');
+        const floatingPayload = document.getElementById('floating-payload');
+
+        let currentMode = 'legacy';
+        let isSimulating = false;
+
+        const uiPanels = {
+            legacy: `
+                <div class="flex-grow">
+                    <h4 class="text-orange-400 font-bold mb-2 uppercase text-[11px] tracking-widest">Legacy HTTP/REST Connectivity</h4>
+                    <p class="text-xs text-slate-300 mb-2">The frameworks format the payload, but rely on standard web traffic to move it. This forces you to build API Gateways, manage load balancers, and open firewall ports.</p>
+                    <div id="terminal-out" class="p-2 bg-slate-900 rounded border border-slate-700 text-xs font-mono text-slate-400 min-h-[5.5rem] overflow-y-auto leading-relaxed">
+                        > L7 Architecture selected.<br>> Awaiting agent SDK trigger...
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-3">
+                    <button onclick="runLegacy('LangGraph')" class="py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] transition-colors border border-slate-600 font-bold">1. Send LangGraph Payload</button>
+                    <button onclick="runLegacy('Google A2A')" class="py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] transition-colors border border-slate-600 font-bold">2. Send Google A2A Payload</button>
+                </div>
+            `,
+            cynapsa: `
+                <div class="flex-grow">
+                    <h4 class="text-cyan-400 font-bold mb-2 uppercase text-[11px] tracking-widest">Orthogonal Security (L7 over L3/L4)</h4>
+                    <p class="text-xs text-slate-300 mb-2">Cynapsa does not replace your framework. Agents still \"speak\" CrewAI or A2A, but they transmit that payload over the Cynapsa Zero-Trust mesh. Firewalls stay closed.</p>
+                    <div id="terminal-out" class="p-2 bg-slate-900 rounded border border-slate-700 text-xs font-mono text-slate-400 min-h-[5.5rem] overflow-y-auto leading-relaxed">
+                        > Cynapsa L3/L4 Underlay Active.<br>> Firewall: DENY ALL INBOUND.<br>> Awaiting agent SDK trigger...
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-3">
+                    <button onclick="runCynapsa('LangGraph')" class="py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] transition-colors border border-slate-600 font-bold hover:border-cyan-400 hover:shadow-[0_0_10px_rgba(34,211,238,0.3)]">1. Send LangGraph Payload</button>
+                    <button onclick="runCynapsa('Google A2A')" class="py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] transition-colors border border-slate-600 font-bold hover:border-cyan-400 hover:shadow-[0_0_10px_rgba(34,211,238,0.3)]">2. Send Google A2A Payload</button>
+                </div>
+            `
+        };
+
+        function setMode(mode) {
+            if (isSimulating) return;
+            currentMode = mode;
+            networkLines.innerHTML = '';
+            
+            const btnLegacy = document.getElementById('btn-legacy');
+            const btnCyn = document.getElementById('btn-cynapsa');
+            const dotLegacy = document.getElementById('dot-legacy');
+            const dotCyn = document.getElementById('dot-cynapsa');
+            
+            const fw = document.getElementById('node-fw');
+            const ccp = document.getElementById('node-ccp');
+            const apiGw = document.getElementById('node-api-gw');
+
+            // Reset labels
+            document.getElementById('framework-label-a').style.opacity = '0';
+            document.getElementById('framework-label-b').style.opacity = '0';
+
+            if (mode === 'legacy') {
+                btnLegacy?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotLegacy?.classList.replace('bg-slate-800', 'bg-cyan-500');
+                dotLegacy?.classList.replace('text-slate-500', 'text-slate-900');
+                btnLegacy?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
+
+                btnCyn?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotCyn?.classList.replace('bg-cyan-500', 'bg-slate-800');
+                dotCyn?.classList.replace('text-slate-900', 'text-slate-500');
+                btnCyn?.querySelector('h3')?.classList.replace('text-white', 'text-slate-300');
+
+                // Visuals: Open FW, Show API GW, Hide CCP
+                fw.className = "w-6 h-64 firewall-open bg-slate-800 rounded flex flex-col items-center justify-center transition-all duration-300";
+                fw.firstElementChild.innerText = "FIREWALL (OPEN PORT 443)";
+                fw.firstElementChild.classList.replace('text-red-400', 'text-orange-400');
+                
+                apiGw.style.opacity = '1';
+                apiGw.style.transform = 'translate(-50%, -50%) scale(1)';
+
+                ccp.style.opacity = '0';
+                ccp.style.transform = 'translate(-50%, 0) scale(0.5)';
+
+            } else {
+                btnCyn?.classList.add('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotCyn?.classList.replace('bg-slate-800', 'bg-cyan-500');
+                dotCyn?.classList.replace('text-slate-500', 'text-slate-900');
+                btnCyn?.querySelector('h3')?.classList.replace('text-slate-300', 'text-white');
+
+                btnLegacy?.classList.remove('border-cyan-500', 'shadow-[0_0_15px_rgba(34,211,238,0.1)]');
+                dotLegacy?.classList.replace('bg-cyan-500', 'bg-slate-800');
+                dotLegacy?.classList.replace('text-slate-900', 'text-slate-500');
+                btnLegacy?.querySelector('h3')?.classList.replace('text-white', 'text-slate-300');
+
+                // Visuals: Solid FW, Hide API GW, Show CCP
+                fw.className = "w-6 h-64 firewall-solid bg-slate-800 rounded flex flex-col items-center justify-center transition-all duration-300";
+                fw.firstElementChild.innerText = "FIREWALL (DENY ALL)";
+                fw.firstElementChild.classList.replace('text-orange-400', 'text-red-400');
+                
+                apiGw.style.opacity = '0';
+                apiGw.style.transform = 'translate(-50%, -50%) scale(0.5)';
+
+                ccp.style.opacity = '1';
+                ccp.style.transform = 'translate(-50%, 0) scale(1)';
+            }
+
+            if(actionPanel) actionPanel.innerHTML = uiPanels[mode];
+        }
+
+        function setFrameworkLabels(framework) {
+            const lblA = document.getElementById('framework-label-a');
+            const lblB = document.getElementById('framework-label-b');
+            
+            lblA.innerText = `L7: ${framework}`;
+            lblB.innerText = `L7: ${framework}`;
+            
+            lblA.style.opacity = '1';
+            lblB.style.opacity = '1';
+
+            floatingPayload.innerText = `{ ${framework} Payload }`;
+        }
+
+        // --- LEGACY ---
+
+        function runLegacy(framework) {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            const out = document.getElementById('terminal-out');
+            
+            setFrameworkLabels(framework);
+
+            if(out) out.innerHTML = `> Initiating Agent formats payload using ${framework} SDK...<br>> Transmitting via standard HTTP/REST network stack...`;
+
+            // Draw line to API GW
+            drawLine('node-agent-a', 'node-api-gw', 'stream-l7-payload', 'l1');
+            
+            // Move payload visually
+            movePayload('node-agent-a', 'node-api-gw', 800);
+
+            setTimeout(() => {
+                if(!isSimulating) return;
+                if(out) out.innerHTML += `<br>> <span class="text-orange-400">Hitting Central API Gateway bottleneck...</span>`;
+                document.getElementById('node-api-gw').style.animation = 'pulse-warning 0.5s infinite';
+
+                setTimeout(() => {
+                    if(!isSimulating) return;
+                    document.getElementById('node-api-gw').style.animation = 'none';
+                    
+                    drawLine('node-api-gw', 'node-agent-b', 'stream-l7-payload', 'l2');
+                    movePayload('node-api-gw', 'node-agent-b', 800);
+
+                    if(out) out.innerHTML += `<br>> Routing through OPEN firewall port 443 to On-Premise server...`;
+
+                    setTimeout(() => {
+                        if(!isSimulating) return;
+                        if(out) out.innerHTML += `<br><span class="text-red-400 font-bold">> Payload Delivered. However, network required exposed ports and centralized load balancers.</span>`;
+                        floatingPayload.style.opacity = '0';
+                        setTimeout(() => { isSimulating = false; }, 3000);
+                    }, 800);
+
+                }, 1000);
+            }, 800);
+        }
+
+        // --- CYNAPSA ---
+
+        function runCynapsa(framework) {
+            if (isSimulating) return;
+            isSimulating = true;
+            networkLines.innerHTML = '';
+            const out = document.getElementById('terminal-out');
+            
+            setFrameworkLabels(framework);
+
+            if(out) out.innerHTML = `> Initiating Agent formats payload using ${framework} SDK...<br>> Cynapsa intercepts transport layer...`;
+
+            // 1. Auth via CCP
+            drawLine('node-agent-a', 'node-ccp', 'stream-auth', 'auth-line');
+            
+            setTimeout(() => {
+                if(!isSimulating) return;
+                if(out) out.innerHTML += `<br>> Identity verified out-of-band by CCP.<br>> Establishing secure L3/L4 P2P mesh tunnel...`;
+                
+                // 2. Build Tunnel
+                drawLine('node-agent-a', 'node-fw', 'stream-cynapsa-tunnel');
+                drawLine('node-fw', 'node-agent-b', 'stream-cynapsa-tunnel');
+                
+                setTimeout(() => {
+                    if(!isSimulating) return;
+                    if(out) out.innerHTML += `<br>> Transporting ${framework} payload inside secure tunnel...`;
+                    
+                    // Send payload
+                    drawLine('node-agent-a', 'node-fw', 'stream-cynapsa-payload');
+                    drawLine('node-fw', 'node-agent-b', 'stream-cynapsa-payload');
+                    movePayload('node-agent-a', 'node-agent-b', 1200);
+
+                    setTimeout(() => {
+                        if(!isSimulating) return;
+                        if(out) out.innerHTML += `<br><span class="text-green-400 font-bold">> PERFECT SYNERGY: The ${framework} SDK dictated the language, while Cynapsa provided a zero-trust, closed-firewall network underlay.</span>`;
+                        floatingPayload.style.opacity = '0';
+                        
+                        setTimeout(() => { isSimulating = false; }, 3500);
+                    }, 1200);
+                }, 800);
+
+            }, 1000);
+        }
+
+        // --- Helpers ---
+        function drawLine(id1, id2, cssClass, domId = null) {
+            const el1 = document.getElementById(id1);
+            const el2 = document.getElementById(id2);
+            if (!el1 || !el2) return null;
+
+            const rect1 = el1.getBoundingClientRect();
+            const rect2 = el2.getBoundingClientRect();
+            const containerRect = document.getElementById('canvas-container').getBoundingClientRect();
+
+            const x1 = rect1.left + rect1.width/2 - containerRect.left;
+            const y1 = rect1.top + rect1.height/2 - containerRect.top;
+            const x2 = rect2.left + rect2.width/2 - containerRect.left;
+            const y2 = rect2.top + rect2.height/2 - containerRect.top;
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('class', cssClass);
+            if(domId) line.setAttribute('id', domId);
+
+            networkLines.appendChild(line);
+            return line;
+        }
+
+        function movePayload(startId, endId, durationMs) {
+            const startEl = document.getElementById(startId);
+            const endEl = document.getElementById(endId);
+            const containerRect = document.getElementById('canvas-container').getBoundingClientRect();
+
+            if(!startEl || !endEl) return;
+
+            const rect1 = startEl.getBoundingClientRect();
+            const rect2 = endEl.getBoundingClientRect();
+
+            const startX = rect1.left + rect1.width/2 - containerRect.left;
+            const startY = rect1.top + rect1.height/2 - containerRect.top;
+            
+            const endX = rect2.left + rect2.width/2 - containerRect.left;
+            const endY = rect2.top + rect2.height/2 - containerRect.top;
+
+            // Reset positioning
+            floatingPayload.style.transition = 'none';
+            floatingPayload.style.transform = `translate(-50%, -150%)`; // Offset up slightly so it doesn't block the line
+            floatingPayload.style.left = `${startX}px`;
+            floatingPayload.style.top = `${startY}px`;
+            floatingPayload.style.opacity = '1';
+
+            // Force reflow
+            void floatingPayload.offsetWidth;
+
+            // Animate to end
+            floatingPayload.style.transition = `left ${durationMs}ms linear, top ${durationMs}ms linear`;
+            floatingPayload.style.left = `${endX}px`;
+            floatingPayload.style.top = `${endY}px`;
+            floatingPayload.style.animation = `payload-pulse 0.5s infinite`;
+        }
+
+        // Expose globally
+        window.setMode = setMode;
+        window.runLegacy = runLegacy;
+        window.runCynapsa = runCynapsa;
+
+        // Init
+        window.onload = () => {
+            setTimeout(() => setMode('legacy'), 100);
+        };
+        window.addEventListener('resize', () => {
+            if(!isSimulating) setMode(currentMode);
+        });
+    </script>
+</body>
+</html>
