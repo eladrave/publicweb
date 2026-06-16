@@ -1,6 +1,6 @@
 {
   "agenitc_sdk.html": {
-    "description": "See how agent frameworks like LangGraph, CrewAI, and Google A2A work cleanly at Layer 7, yet fail on legacy networks that force API gateways and open firewall ports, and how Cynapsa provides the zero-trust tunnel instead.",
+    "description": "See how agent frameworks like LangGraph, CrewAI, and Google A2A work cleanly at Layer 7, yet fail on legacy networks that force API gateways and open firewall ports, and how Rave Tech provides the zero-trust tunnel instead.",
     "eyebrow": "Layer 7 vs. Layer 3/4",
     "title": "Agentic SDKs Assume Connectivity"
   },

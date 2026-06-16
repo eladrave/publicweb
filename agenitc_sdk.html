@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cynapsa: Frameworks vs. Infrastructure</title>
+    <title>Rave Tech: Frameworks vs. Infrastructure</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Core Animations */
@@ -25,8 +25,8 @@
         /* Line Styles */
         .stream-legacy { stroke-dasharray: 6 6; stroke: #94a3b8; stroke-width: 2; opacity: 0.3; }
         .stream-l7-payload { stroke-dasharray: 8 8; animation: flow-slow 0.8s linear infinite; stroke: #f59e0b; stroke-width: 3; filter: drop-shadow(0 0 4px #f59e0b); }
-        .stream-cynapsa-tunnel { stroke-dasharray: 2 8; animation: flow-fast 0.5s linear infinite; stroke: #22d3ee; stroke-width: 8; opacity: 0.3; stroke-linecap: round;}
-        .stream-cynapsa-payload { stroke-dasharray: 8 8; animation: flow-fast 0.4s linear infinite; stroke: #4ade80; stroke-width: 3; filter: drop-shadow(0 0 4px #4ade80); }
+        .stream-ravetech-tunnel { stroke-dasharray: 2 8; animation: flow-fast 0.5s linear infinite; stroke: #22d3ee; stroke-width: 8; opacity: 0.3; stroke-linecap: round;}
+        .stream-ravetech-payload { stroke-dasharray: 8 8; animation: flow-fast 0.4s linear infinite; stroke: #4ade80; stroke-width: 3; filter: drop-shadow(0 0 4px #4ade80); }
         .stream-auth { stroke-dasharray: 4 4; animation: flow-fast 0.6s linear infinite; stroke: #a855f7; stroke-width: 2; }
 
         .fade-in { animation: fadeIn 0.4s ease-in forwards; }
@@ -66,11 +66,11 @@
                     </div>
                 </button>
 
-                <button onclick="setMode('cynapsa')" id="btn-cynapsa" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-transparent hover:bg-slate-800/50 relative group">
-                    <div id="dot-cynapsa" class="w-8 h-8 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
+                <button onclick="setMode('ravetech')" id="btn-ravetech" class="w-full text-left flex items-start p-3 rounded-xl transition-all border-2 border-transparent hover:bg-slate-800/50 relative group">
+                    <div id="dot-ravetech" class="w-8 h-8 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold shrink-0 mt-0.5 mr-4 z-10">2</div>
                     <div>
-                        <h3 class="text-slate-300 group-hover:text-white font-semibold text-md">L7 Frameworks over Cynapsa</h3>
-                        <p class="text-xs text-slate-500 group-hover:text-slate-400 mt-1">Agents still speak LangGraph or A2A, but Cynapsa provides the L3/L4 zero-trust tunnel. Firewalls stay closed. Completely orthogonal and complementary.</p>
+                        <h3 class="text-slate-300 group-hover:text-white font-semibold text-md">L7 Frameworks over Rave Tech</h3>
+                        <p class="text-xs text-slate-500 group-hover:text-slate-400 mt-1">Agents still speak LangGraph or A2A, but Rave Tech provides the L3/L4 zero-trust tunnel. Firewalls stay closed. Completely orthogonal and complementary.</p>
                     </div>
                 </button>
             </div>
@@ -124,10 +124,10 @@
                 <div class="text-xs font-bold text-slate-300 mt-3 text-center">Target Agent / DB</div>
             </div>
 
-            <!-- CCP Hub (Used only in Cynapsa) -->
+            <!-- CCP Hub (Used only in Rave Tech) -->
             <div id="node-ccp" class="absolute top-16 left-1/2 -translate-x-1/2 flex flex-col items-center z-40 transition-all duration-500 opacity-0 scale-50 pointer-events-none">
                 <div class="w-16 h-16 bg-slate-800 border-2 border-purple-500 rounded-full flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(168,85,247,0.4)] relative">🧠</div>
-                <span class="text-[10px] font-bold text-purple-300 mt-2 text-center bg-slate-900/80 px-2 py-1 rounded border border-slate-700">Cynapsa Control Plane</span>
+                <span class="text-[10px] font-bold text-purple-300 mt-2 text-center bg-slate-900/80 px-2 py-1 rounded border border-slate-700">Rave Tech Control Plane</span>
             </div>
             
             <!-- Payload UI Element -->
@@ -161,17 +161,17 @@
                     <button onclick="runLegacy('Google A2A')" class="py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] transition-colors border border-slate-600 font-bold">2. Send Google A2A Payload</button>
                 </div>
             `,
-            cynapsa: `
+            ravetech: `
                 <div class="flex-grow">
                     <h4 class="text-cyan-400 font-bold mb-2 uppercase text-[11px] tracking-widest">Orthogonal Security (L7 over L3/L4)</h4>
-                    <p class="text-xs text-slate-300 mb-2">Cynapsa does not replace your framework. Agents still \"speak\" CrewAI or A2A, but they transmit that payload over the Cynapsa Zero-Trust mesh. Firewalls stay closed.</p>
+                    <p class="text-xs text-slate-300 mb-2">Rave Tech does not replace your framework. Agents still \"speak\" CrewAI or A2A, but they transmit that payload over the Rave Tech Zero-Trust mesh. Firewalls stay closed.</p>
                     <div id="terminal-out" class="p-2 bg-slate-900 rounded border border-slate-700 text-xs font-mono text-slate-400 min-h-[5.5rem] overflow-y-auto leading-relaxed">
-                        > Cynapsa L3/L4 Underlay Active.<br>> Firewall: DENY ALL INBOUND.<br>> Awaiting agent SDK trigger...
+                        > Rave Tech L3/L4 Underlay Active.<br>> Firewall: DENY ALL INBOUND.<br>> Awaiting agent SDK trigger...
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mt-3">
-                    <button onclick="runCynapsa('LangGraph')" class="py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] transition-colors border border-slate-600 font-bold hover:border-cyan-400 hover:shadow-[0_0_10px_rgba(34,211,238,0.3)]">1. Send LangGraph Payload</button>
-                    <button onclick="runCynapsa('Google A2A')" class="py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] transition-colors border border-slate-600 font-bold hover:border-cyan-400 hover:shadow-[0_0_10px_rgba(34,211,238,0.3)]">2. Send Google A2A Payload</button>
+                    <button onclick="runRaveTech('LangGraph')" class="py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] transition-colors border border-slate-600 font-bold hover:border-cyan-400 hover:shadow-[0_0_10px_rgba(34,211,238,0.3)]">1. Send LangGraph Payload</button>
+                    <button onclick="runRaveTech('Google A2A')" class="py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] transition-colors border border-slate-600 font-bold hover:border-cyan-400 hover:shadow-[0_0_10px_rgba(34,211,238,0.3)]">2. Send Google A2A Payload</button>
                 </div>
             `
         };
@@ -182,9 +182,9 @@
             networkLines.innerHTML = '';
             
             const btnLegacy = document.getElementById('btn-legacy');
-            const btnCyn = document.getElementById('btn-cynapsa');
+            const btnCyn = document.getElementById('btn-ravetech');
             const dotLegacy = document.getElementById('dot-legacy');
-            const dotCyn = document.getElementById('dot-cynapsa');
+            const dotCyn = document.getElementById('dot-ravetech');
             
             const fw = document.getElementById('node-fw');
             const ccp = document.getElementById('node-ccp');
@@ -298,9 +298,9 @@
             }, 800);
         }
 
-        // --- CYNAPSA ---
+        // --- RAVE TECH ---
 
-        function runCynapsa(framework) {
+        function runRaveTech(framework) {
             if (isSimulating) return;
             isSimulating = true;
             networkLines.innerHTML = '';
@@ -308,7 +308,7 @@
             
             setFrameworkLabels(framework);
 
-            if(out) out.innerHTML = `> Initiating Agent formats payload using ${framework} SDK...<br>> Cynapsa intercepts transport layer...`;
+            if(out) out.innerHTML = `> Initiating Agent formats payload using ${framework} SDK...<br>> Rave Tech intercepts transport layer...`;
 
             // 1. Auth via CCP
             drawLine('node-agent-a', 'node-ccp', 'stream-auth', 'auth-line');
@@ -318,21 +318,21 @@
                 if(out) out.innerHTML += `<br>> Identity verified out-of-band by CCP.<br>> Establishing secure L3/L4 P2P mesh tunnel...`;
                 
                 // 2. Build Tunnel
-                drawLine('node-agent-a', 'node-fw', 'stream-cynapsa-tunnel');
-                drawLine('node-fw', 'node-agent-b', 'stream-cynapsa-tunnel');
+                drawLine('node-agent-a', 'node-fw', 'stream-ravetech-tunnel');
+                drawLine('node-fw', 'node-agent-b', 'stream-ravetech-tunnel');
                 
                 setTimeout(() => {
                     if(!isSimulating) return;
                     if(out) out.innerHTML += `<br>> Transporting ${framework} payload inside secure tunnel...`;
                     
                     // Send payload
-                    drawLine('node-agent-a', 'node-fw', 'stream-cynapsa-payload');
-                    drawLine('node-fw', 'node-agent-b', 'stream-cynapsa-payload');
+                    drawLine('node-agent-a', 'node-fw', 'stream-ravetech-payload');
+                    drawLine('node-fw', 'node-agent-b', 'stream-ravetech-payload');
                     movePayload('node-agent-a', 'node-agent-b', 1200);
 
                     setTimeout(() => {
                         if(!isSimulating) return;
-                        if(out) out.innerHTML += `<br><span class="text-green-400 font-bold">> PERFECT SYNERGY: The ${framework} SDK dictated the language, while Cynapsa provided a zero-trust, closed-firewall network underlay.</span>`;
+                        if(out) out.innerHTML += `<br><span class="text-green-400 font-bold">> PERFECT SYNERGY: The ${framework} SDK dictated the language, while Rave Tech provided a zero-trust, closed-firewall network underlay.</span>`;
                         floatingPayload.style.opacity = '0';
                         
                         setTimeout(() => { isSimulating = false; }, 3500);
@@ -405,7 +405,7 @@
         // Expose globally
         window.setMode = setMode;
         window.runLegacy = runLegacy;
-        window.runCynapsa = runCynapsa;
+        window.runRaveTech = runRaveTech;
 
         // Init
         window.onload = () => {
